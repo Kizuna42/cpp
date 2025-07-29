@@ -1,20 +1,20 @@
 # 実装計画
 
-- [-] 1. プロジェクト構造とコアインターフェースの設定
+- [x] 1. プロジェクト構造とコアインターフェースの設定
 
   - C++98 準拠のプロジェクト構造を作成し、Makefile とビルドシステムを設定
   - IValidator、ValidationResult、ValidationContext などのコアインターフェースを定義
   - _要件: 1.1, 1.4, 5.1_
 
-- [ ] 2. データモデルと基本構造体の実装
-- [ ] 2.1 ValidationResult と Issue 構造体の実装
+- [x] 2. データモデルと基本構造体の実装
+- [x] 2.1 ValidationResult と Issue 構造体の実装
 
   - ValidationResult、Issue、ValidationContext の構造体を実装
   - 日英両言語対応のメッセージフィールドを含める
   - 単体テストを作成してデータ構造の正確性を検証
   - _要件: 6.1, 6.4_
 
-- [ ] 2.2 ModuleRules とエラーハンドリングの実装
+- [x] 2.2 ModuleRules とエラーハンドリングの実装
 
   - ModuleRules 構造体と ValidationException 例外クラスを実装
   - ErrorCode 列挙型とエラー分類システムを作成
