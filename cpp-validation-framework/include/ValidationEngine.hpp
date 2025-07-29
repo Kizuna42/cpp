@@ -7,6 +7,10 @@
 #include <vector>
 #include <string>
 
+// Forward declarations for threading
+struct ValidatorTask;
+struct ThreadPool;
+
 /**
  * @brief Main validation engine that orchestrates all validation processes
  * 
@@ -17,6 +21,8 @@
 class ValidationEngine {
 private:
     std::vector<IValidator*> validators_;
+    bool enableParallelProcessing_;
+    int maxThreads_;
     
 public:
     ValidationEngine();
@@ -53,6 +59,30 @@ public:
      * @return Number of validators
      */
     size_t getValidatorCount() const;
+    
+    /**
+     * @brief Get list of validator names
+     * @return Vector of validator names
+     */
+    std::vector<std::string> getValidatorNames() const;
+    
+    /**
+     * @brief Enable or disable parallel processing
+     * @param enable True to enable parallel processing
+     */
+    void setParallelProcessing(bool enable);
+    
+    /**
+     * @brief Set maximum number of threads for parallel processing
+     * @param maxThreads Maximum number of threads (0 = auto-detect)
+     */
+    void setMaxThreads(int maxThreads);
+    
+    /**
+     * @brief Get current parallel processing setting
+     * @return True if parallel processing is enabled
+     */
+    bool isParallelProcessingEnabled() const;
 
 private:
     /**
@@ -79,6 +109,33 @@ private:
      * @brief Sort validators by priority
      */
     void sortValidatorsByPriority();
+    
+    /**
+     * @brief Scan directory for C++ source and header files
+     * @param directory Directory to scan
+     * @param context Context to populate with discovered files
+     */
+    void scanDirectory(const std::string& directory, ValidationContext& context);
+    
+    /**
+     * @brief Execute validators in parallel
+     * @param context The validation context
+     * @return Aggregated validation result
+     */
+    ValidationResult executeValidatorsParallel(const ValidationContext& context);
+    
+    /**
+     * @brief Execute validators sequentially
+     * @param context The validation context
+     * @return Aggregated validation result
+     */
+    ValidationResult executeValidatorsSequential(const ValidationContext& context);
+    
+    /**
+     * @brief Get optimal number of threads for current system
+     * @return Number of threads to use
+     */
+    int getOptimalThreadCount() const;
 };
 
 #endif // VALIDATIONENGINE_HPP
