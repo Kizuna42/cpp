@@ -22,7 +22,12 @@
       "Bash(./sed test.txt \"test\" \"REPLACED\")",
       "Bash(cat:*)",
       "Bash(./harl)",
-      "Bash(./harlFilter:*)"
+      "Bash(./harlFilter:*)",
+      "Bash(timeout:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(gh pr view:*)"
     ],
     "deny": []
   }
