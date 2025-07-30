@@ -2,7 +2,7 @@
 
 ## 概要
 
-42スクールのC++カリキュラムプロジェクトです。C++98標準に準拠し、オブジェクト指向プログラミングの基礎から応用まで段階的に学習します。
+42 スクールの C++カリキュラムプロジェクトです。C++98 標準に準拠し、オブジェクト指向プログラミングの基礎から応用まで段階的に学習します。
 
 ## プロジェクト構成
 
@@ -10,7 +10,7 @@
 cpp/
 ├── cpp00/          # Module 00: 名前空間、クラス、メンバ関数 ✅
 │   ├── ex00/       # Megaphone
-│   ├── ex01/       # PhoneBook  
+│   ├── ex01/       # PhoneBook
 │   └── ex02/       # Account
 ├── cpp01/          # Module 01: メモリ割り当て、ポインタ、参照 🚧
 ├── cpp02/          # Module 02: 多態性、演算子オーバーロード 🚧
@@ -24,13 +24,15 @@ cpp/
 ## 開発環境
 
 ### 必要ツール
-- **コンパイラ**: g++ または clang++ (C++98サポート)
+
+- **コンパイラ**: g++ または clang++ (C++98 サポート)
 - **make**: GNU Make
 - **Git**: バージョン管理
 
 ### 開発環境
+
 - **macOS**: 主要開発環境
-- **Ubuntu**: valgrindによるメモリテスト環境
+- **Ubuntu**: valgrind によるメモリテスト環境
 
 ## ビルド方法
 
@@ -56,21 +58,24 @@ make fclean
 ## 開発制約
 
 ### 禁止項目
-- C++11以降の機能
-- STLコンテナ（Module 08まで）
+
+- C++11 以降の機能
+- STL コンテナ（Module 08 まで）
 - `using namespace`文
 - `printf()`, `malloc()`, `free()`
 - `friend`キーワード
 
 ### 必須項目
-- Orthodox Canonical Form（Module 02から）
+
+- Orthodox Canonical Form（Module 02 から）
 - メモリリーク防止
-- RAII原則
+- RAII 原則
 - インクルードガード
 
 ## テスト戦略
 
 ### macOS（開発）
+
 ```bash
 # 静的解析
 cppcheck --enable=all --std=c++98 src/
@@ -80,6 +85,7 @@ clang++ -Wall -Wextra -Werror -std=c++98 -Weverything
 ```
 
 ### Ubuntu（検証）
+
 ```bash
 # メモリリーク検出
 valgrind --leak-check=full ./program
@@ -93,7 +99,7 @@ g++ -fsanitize=address -g
 ```
 main
 ├── feature/cpp01-implementation
-├── feature/cpp02-implementation  
+├── feature/cpp02-implementation
 ├── feature/cpp03-implementation
 ├── feature/cpp04-implementation
 └── docs/enhance-cpp00-documentation
@@ -102,6 +108,7 @@ main
 ## 学習目標
 
 ### Module 00: C++基礎
+
 - 名前空間とクラス
 - メンバ関数
 - stdio streams
@@ -109,20 +116,24 @@ main
 - static, const
 
 ### Module 01: メモリとポインタ
+
 - メモリ割り当て
 - ポインタと参照
-- switch文
+- switch 文
 
 ### Module 02: 多態性
-- Ad-hoc多態性
+
+- Ad-hoc 多態性
 - 演算子オーバーロード
 - Orthodox Canonical Form
 
 ### Module 03: 継承
+
 - 継承概念
 - 仮想関数
 
 ### Module 04: 抽象化
+
 - サブタイプ多態性
 - 抽象クラス
 - インターフェース
@@ -132,7 +143,7 @@ main
 - ✅ コンパイル警告ゼロ
 - ✅ メモリリークゼロ
 - ✅ 全機能要件満足
-- ✅ C++98標準準拠
+- ✅ C++98 標準準拠
 
 ## ドキュメント
 
@@ -142,7 +153,7 @@ main
 
 ## ライセンス
 
-このプロジェクトは42スクールの教育目的で作成されています。
+このプロジェクトは 42 スクールの教育目的で作成されています。
 
 ---
 

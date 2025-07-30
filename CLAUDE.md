@@ -23,7 +23,7 @@ make
 
 # Clean build artifacts
 make clean    # Remove .o files
-make fclean   # Remove all generated files  
+make fclean   # Remove all generated files
 make re       # Clean rebuild
 ```
 
@@ -150,19 +150,6 @@ g++ -Wall -Wextra -Werror -std=c++98 -fsanitize=address
 
 ### Code Documentation Requirements
 
-**Header Comments (all files):**
-```cpp
-/* ************************************************************************** */
-/*                                                                            */
-/*   [filename]                               :+:      :+:    :+:   */
-/*                                        +:+ +:+         +:+     */
-/*   By: [author] <[email]>                +#+  +:+       +#+        */
-/*                                        +#+#+#+#+#+   +#+           */
-/*   Created: [date] by [author]             #+#    #+#             */
-/*   Updated: [date] by [author]            ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-```
 
 **Detailed Code Comments (for learning):**
 ```cpp
