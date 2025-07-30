@@ -21,37 +21,37 @@
   - エラーハンドリングの単体テストを作成
   - _要件: 4.1, 4.2, 4.3_
 
-- [ ] 3. ValidationEngine の実装
-- [ ] 3.1 基本的な ValidationEngine クラスの作成
+- [x] 3. ValidationEngine の実装
+- [x] 3.1 基本的な ValidationEngine クラスの作成
 
   - ValidationEngine クラスの基本構造を実装
   - 検証器の登録・管理機能を実装
   - 検証プロセスの調整ロジックを作成
   - _要件: 1.1, 5.2_
 
-- [ ] 3.2 並列処理とコンテキスト管理の実装
+- [x] 3.2 並列処理とコンテキスト管理の実装
 
   - 複数検証器の並列実行機能を実装
   - ValidationContext の生成と管理機能を作成
   - スレッドプールによるリソース管理を実装
   - _要件: 5.2_
 
-- [ ] 4. ComplianceChecker の実装
-- [ ] 4.1 ForbiddenFeatureDetector の実装
+- [x] 4. ComplianceChecker の実装
+- [x] 4.1 ForbiddenFeatureDetector の実装
 
   - C++11+機能検出のための正規表現パターンを定義
   - using namespace、friend、STL コンテナの検出ロジックを実装
   - 禁止機能検出の単体テストを作成
   - _要件: 1.2_
 
-- [ ] 4.2 CompilationValidator の実装
+- [x] 4.2 CompilationValidator の実装
 
   - `-Wall -Wextra -Werror -std=c++98`フラグでのコンパイル検証を実装
   - コンパイルエラーの解析と詳細メッセージ生成機能を作成
   - コンパイル成功/失敗の判定ロジックを実装
   - _要件: 1.3, 1.4_
 
-- [ ] 4.3 ComplianceChecker の統合とテスト
+- [x] 4.3 ComplianceChecker の統合とテスト
 
   - ForbiddenFeatureDetector と CompilationValidator を統合
   - C++98 標準準拠チェックの包括的なテストスイートを作成

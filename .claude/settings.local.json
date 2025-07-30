@@ -8,7 +8,21 @@
       "Bash(git add:*)",
       "Bash(git pull:*)",
       "Bash(git ls-tree:*)",
-      "Bash(git remote add:*)"
+      "Bash(git remote add:*)",
+      "Bash(git checkout:*)",
+      "Bash(mkdir:*)",
+      "Bash(git commit:*)",
+      "Bash(make:*)",
+      "Bash(./zombie)",
+      "Bash(ls:*)",
+      "Bash(./zombieHorde)",
+      "Bash(./brain)",
+      "Bash(./:*)",
+      "Bash(./violence)",
+      "Bash(./sed test.txt \"test\" \"REPLACED\")",
+      "Bash(cat:*)",
+      "Bash(./harl)",
+      "Bash(./harlFilter:*)"
     ],
     "deny": []
   }
