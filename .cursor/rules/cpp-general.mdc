@@ -1,0 +1,41 @@
+---
+alwaysApply: true
+description: General C++ coding rules and conventions for 42 school projects
+---
+
+# 42 C++ General Rules
+
+## Compilation Requirements
+- Always compile with `c++` and flags: `-Wall -Wextra -Werror`
+- Code must compile with `-std=c++98` flag
+- Use proper Makefile structure with clean, fclean, re targets
+
+## File and Directory Structure
+- Exercise directories: `ex00`, `ex01`, `ex02`, etc.
+- Class files follow UpperCamelCase: `ClassName.hpp`, `ClassName.cpp`
+- Example: `BrickWall.hpp`, `BrickWall.cpp`
+
+## Forbidden Functions
+- **NEVER use**: `*printf()`, `*alloc()`, `free()`
+- **NEVER use**: `using namespace <ns_name>` (unless explicitly allowed)
+- **NEVER use**: `friend` keyword (unless explicitly allowed)
+- **NEVER use**: STL containers/algorithms until Modules 08-09
+
+## Memory Management
+- Avoid memory leaks when using `new` keyword
+- Implement proper destructors and RAII principles
+- From Module 02-09: Classes must follow Orthodox Canonical Form
+
+## Header Files
+- Include guards required: `#ifndef CLASSNAME_HPP` / `#define CLASSNAME_HPP`
+- Headers must be independently usable (include all dependencies)
+- No function implementations in headers (except templates)
+
+## Output Format
+- All output messages must end with newline character
+- Display to standard output unless specified otherwise
+
+## Code Quality
+- Write clean, readable code for peer evaluation
+- Follow consistent naming conventions
+- Read complete module guidelines before starting

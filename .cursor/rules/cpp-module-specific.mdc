@@ -1,0 +1,62 @@
+---
+globs: cpp00/**,cpp01/**,cpp02/**,cpp03/**,cpp04/**,cpp05/**,cpp06/**,cpp07/**,cpp08/**,cpp09/**
+description: Module-specific C++ rules and requirements
+---
+
+# Module-Specific C++ Rules
+
+## Module 00-01: Basic C++ Concepts
+- Focus on classes, member functions, constructors/destructors
+- Use `std::string` instead of C strings
+- Implement proper encapsulation with private/public sections
+- No STL containers yet (use arrays)
+
+## Module 02-09: Orthodox Canonical Form
+**Required for all classes:**
+- Default constructor
+- Copy constructor
+- Copy assignment operator
+- Destructor
+
+Example structure:
+```cpp
+class MyClass {
+private:
+    // member variables
+    
+public:
+    MyClass();                    // Default constructor
+    MyClass(const MyClass& other); // Copy constructor
+    MyClass& operator=(const MyClass& other); // Assignment operator
+    ~MyClass();                   // Destructor
+};
+```
+
+## Module 03: Inheritance
+- Use `virtual` keyword for polymorphic functions
+- Implement proper constructor/destructor chains
+- Handle diamond inheritance with virtual inheritance
+
+## Module 04: Abstract Classes
+- Use pure virtual functions: `virtual void func() = 0;`
+- Implement interfaces properly
+- Deep copy implementation for classes with dynamic memory
+
+## Module 05: Exceptions
+- Create custom exception classes
+- Use `try-catch` blocks appropriately
+- Throw exceptions for error conditions
+
+## Module 06: Casts
+- Use appropriate C++ casts: `static_cast`, `dynamic_cast`, `reinterpret_cast`
+- Avoid C-style casts
+
+## Module 07: Templates
+- Implement template classes and functions
+- Handle template instantiation properly
+- Use template specialization when needed
+
+## Module 08-09: STL
+- Now allowed to use STL containers and algorithms
+- Use `std::vector`, `std::map`, `std::stack`, etc.
+- Implement iterators properly
