@@ -5,12 +5,15 @@ description: Testing and validation rules for C++ exercises
 # C++ Testing and Validation Rules
 
 ## Compilation Testing
+
 Before submitting any exercise, verify:
+
 1. **Clean compilation**: `make re` succeeds without warnings
 2. **C++98 compliance**: Code compiles with `-std=c++98`
 3. **All flags**: `-Wall -Wextra -Werror` must pass
 
 ## Common Issues to Check
+
 - Missing source files (like `PresidentialPardonForm.cpp`)
 - Self-assignment warnings (`-Wself-assign-overloaded`)
 - Memory leaks with `new`/`delete`
@@ -18,18 +21,21 @@ Before submitting any exercise, verify:
 - Function implementations in headers
 
 ## Testing Strategy
+
 1. **Compile all exercises**: Test every module systematically
 2. **Run basic tests**: Verify programs execute without crashes
 3. **Check output format**: Ensure proper newline endings
 4. **Validate requirements**: Confirm all assignment requirements met
 
 ## Quality Assurance
+
 - All 43 exercises across 10 modules should compile successfully
 - No forbidden functions used (`*printf`, `*alloc`, `free`)
 - Proper class design following Orthodox Canonical Form
 - Clean, readable code for peer evaluation
 
 ## Documentation
+
 - Update evaluation reports with test results
 - Document any fixes or improvements made
 - Maintain comprehensive project status

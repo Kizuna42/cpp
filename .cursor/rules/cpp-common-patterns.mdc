@@ -6,6 +6,7 @@ description: Common C++ patterns and best practices for 42 exercises
 # Common C++ Patterns for 42 Exercises
 
 ## Header Guard Pattern
+
 ```cpp
 #ifndef CLASSNAME_HPP
 #define CLASSNAME_HPP
@@ -16,22 +17,24 @@ description: Common C++ patterns and best practices for 42 exercises
 ```
 
 ## Orthodox Canonical Form Pattern
+
 ```cpp
 class MyClass {
 private:
     // member variables
-    
+
 public:
     MyClass();                           // Default constructor
     MyClass(const MyClass& other);       // Copy constructor
     MyClass& operator=(const MyClass& other); // Assignment operator
     ~MyClass();                          // Destructor
-    
+
     // other member functions
 };
 ```
 
 ## Exception Class Pattern
+
 ```cpp
 class MyException : public std::exception {
 public:
@@ -42,20 +45,21 @@ public:
 ```
 
 ## Template Class Pattern
+
 ```cpp
 template<typename T>
 class MyTemplate {
 private:
     T* _data;
     size_t _size;
-    
+
 public:
     MyTemplate();
     MyTemplate(size_t size);
     MyTemplate(const MyTemplate& other);
     MyTemplate& operator=(const MyTemplate& other);
     ~MyTemplate();
-    
+
     T& operator[](size_t index);
     const T& operator[](size_t index) const;
     size_t size() const;
@@ -63,6 +67,7 @@ public:
 ```
 
 ## Virtual Function Pattern (Polymorphism)
+
 ```cpp
 class Base {
 public:
@@ -77,11 +82,12 @@ public:
 ```
 
 ## Static Member Pattern
+
 ```cpp
 class MyClass {
 private:
     static int _count;               // Static member variable
-    
+
 public:
     static int getCount();           // Static member function
 };

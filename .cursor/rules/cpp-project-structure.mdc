@@ -6,6 +6,7 @@ description: Project structure and file organization for 42 C++ modules
 # 42 C++ Project Structure
 
 ## Directory Layout
+
 ```
 cpp/
 ├── cpp00/           # Module 00: Basic C++ concepts
@@ -27,6 +28,7 @@ cpp/
 ```
 
 ## Key Files
+
 - [COMPREHENSIVE_EVALUATION.md](mdc:COMPREHENSIVE_EVALUATION.md) - Complete project evaluation
 - [README.md](mdc:README.md) - Project overview
 - Each module contains:
@@ -35,7 +37,9 @@ cpp/
   - `ex00/`, `ex01/`, etc. - Exercise implementations
 
 ## Exercise Structure
+
 Each exercise directory contains:
+
 - `Makefile` - Build configuration
 - `*.hpp` - Header files (class declarations)
 - `*.cpp` - Source files (class implementations)
@@ -43,6 +47,7 @@ Each exercise directory contains:
 - Executable (after compilation)
 
 ## Assignment Requirements
+
 - Check [cpp00/cpp00/images/](mdc:cpp00/cpp00/images/) for assignment details
 - Review [cpp00/ng_4_cpp_module_00/images/](mdc:cpp00/ng_4_cpp_module_00/images/) for evaluation criteria
 - Follow exact specifications from PDF images
