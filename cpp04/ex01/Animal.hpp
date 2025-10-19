@@ -6,17 +6,17 @@
 
 class Animal {
 protected:
-    std::string type;
+	std::string type;
 
 public:
-    Animal(void);
-    Animal(const std::string& type);
-    Animal(const Animal& other);
-    Animal& operator=(const Animal& other);
-    virtual ~Animal(void);  // Virtual destructor for proper polymorphism
-    
-    virtual void makeSound(void) const;  // Virtual function for polymorphism
-    std::string getType(void) const;
+	Animal(void);
+	Animal(const std::string& type);
+	Animal(const Animal& other);
+	Animal& operator=(const Animal& other);
+	virtual ~Animal(void);
+
+	virtual void makeSound(void) const;
+	std::string getType(void) const;
 };
 
 #endif

@@ -5,12 +5,12 @@
 
 class WrongCat : public WrongAnimal {
 public:
-    WrongCat(void);
-    WrongCat(const WrongCat& other);
-    WrongCat& operator=(const WrongCat& other);
-    ~WrongCat(void);
-    
-    void makeSound(void) const;  // Non-virtual override (wrong!)
+	WrongCat(void);
+	WrongCat(const WrongCat& other);
+	WrongCat& operator=(const WrongCat& other);
+	~WrongCat(void);
+
+	void makeSound(void) const;
 };
 
 #endif
