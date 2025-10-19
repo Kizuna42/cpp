@@ -115,10 +115,8 @@ int main(void) {
 	MateriaSource* sourceCopy = new MateriaSource(*source);
 	sourceCopy->printTemplates();
 
-	// Test that copies are independent
 	sourceCopy->createMateria("ice");
 
-	// Test self-assignment (from test_examples/test_self_assignment.cpp)
 	std::cout << "\n=== Self-Assignment Test ===" << std::endl;
 	std::cout << "Testing self-assignment safety (character = character)" << std::endl;
 
@@ -130,22 +128,20 @@ int main(void) {
 	selfTest.printInventory();
 
 	std::cout << "\n--- Performing self-assignment ---" << std::endl;
-	// Suppress self-assignment warning for test purposes
 	Character& ref = selfTest;
-	selfTest = ref;  // Self-assignment!
+	selfTest = ref;
 
 	std::cout << "\nAfter self-assignment (inventory should be unchanged):" << std::endl;
 	selfTest.printInventory();
 
 	std::cout << "\n--- Testing that materia still works ---" << std::endl;
 	Character victim("victim");
-	selfTest.use(0, victim);  // Should work without crash
-	selfTest.use(1, victim);  // Should work without crash
+	selfTest.use(0, victim);
+	selfTest.use(1, victim);
 
 	std::cout << "\n✅ If program didn't crash and materia works, self-assignment is handled correctly!" << std::endl;
 	std::cout << "❌ If program crashed, self-assignment check is missing (if (this != &other))" << std::endl;
 
-	// Test clone method
 	std::cout << "\n=== Clone Method Test ===" << std::endl;
 	AMateria* iceOriginal = new Ice();
 	AMateria* iceCloned = iceOriginal->clone();
@@ -170,7 +166,6 @@ int main(void) {
 	delete source;
 	delete sourceCopy;
 
-	// Clean up ground items
 	Character::cleanGround();
 
 	std::cout << "\n--- End of Tests ---" << std::endl;

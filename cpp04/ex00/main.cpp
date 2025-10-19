@@ -7,7 +7,6 @@
 int main(void) {
 	std::cout << "=== Animal Polymorphism Test ===" << std::endl;
 
-	// Test correct polymorphism with virtual functions
 	std::cout << "\n--- Correct Polymorphism (Virtual Functions) ---" << std::endl;
 
 	const Animal* meta = new Animal();
@@ -24,13 +23,11 @@ int main(void) {
 	std::cout << "\nCat type: " << cat->getType() << std::endl;
 	cat->makeSound();
 
-	// Clean up - virtual destructors ensure proper cleanup
 	std::cout << "\nDeleting animals (virtual destructors):" << std::endl;
 	delete meta;
 	delete dog;
 	delete cat;
 
-	// Test wrong implementation (non-virtual functions)
 	std::cout << "\n--- Wrong Implementation (Non-Virtual Functions) ---" << std::endl;
 
 	const WrongAnimal* wrongMeta = new WrongAnimal();
@@ -43,12 +40,10 @@ int main(void) {
 	std::cout << "\nWrongCat type: " << wrongCat->getType() << std::endl;
 	wrongCat->makeSound();
 
-	// Clean up - non-virtual destructors (problematic)
 	std::cout << "\nDeleting wrong animals (non-virtual destructors):" << std::endl;
 	delete wrongMeta;
 	delete wrongCat;
 
-	// Direct instantiation tests
 	std::cout << "\n--- Direct Instantiation Tests ---" << std::endl;
 	Dog directDog;
 	Cat directCat;
@@ -59,7 +54,6 @@ int main(void) {
 	std::cout << "\nDirect Cat:" << std::endl;
 	directCat.makeSound();
 
-	// Array of Animal pointers
 	std::cout << "\n--- Array of Animal Pointers ---" << std::endl;
 	const Animal* animals[4] = {
 		new Animal(),
