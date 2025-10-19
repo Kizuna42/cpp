@@ -8,7 +8,7 @@
 
 class Base {
 public:
-    virtual ~Base(void);
+	virtual ~Base(void);
 };
 
 class A : public Base {};
