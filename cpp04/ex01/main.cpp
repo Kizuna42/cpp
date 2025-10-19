@@ -98,6 +98,48 @@ int main(void) {
 	std::cout << "Copied Dog brain address: " << copiedDog.getBrain() << std::endl;
 	std::cout << "Same address? " << (originalDog.getBrain() == copiedDog.getBrain() ? "YES (SHALLOW COPY - BAD!)" : "NO (DEEP COPY - GOOD!)") << std::endl;
 
+	// Test scope-based deep copy (from test_examples/test_deep_copy_scope.cpp)
+	std::cout << "\n=== Scope-Based Deep Copy Test ===" << std::endl;
+	std::cout << "This test verifies deep copy using scope (from evaluation sheet)" << std::endl;
+	Dog basic;
+	basic.setIdea(0, "Original idea in basic");
+	basic.setIdea(1, "Another original idea");
+	
+	std::cout << "\nBefore entering scope:" << std::endl;
+	basic.printIdeas(2);
+	
+	std::cout << "\n--- Entering inner scope ---" << std::endl;
+	{
+		Dog tmp = basic;  // Copy constructor
+		std::cout << "\nCopied dog's ideas:" << std::endl;
+		tmp.printIdeas(2);
+		
+		tmp.setIdea(0, "Temporary idea");
+		tmp.setIdea(1, "Modified in scope");
+		
+		std::cout << "\nModified tmp's ideas:" << std::endl;
+		tmp.printIdeas(2);
+	}
+	std::cout << "--- Exited inner scope ---" << std::endl;
+	
+	// If shallow copy, basic would have a dangling pointer here!
+	std::cout << "\nbasic's ideas after scope (should be unchanged):" << std::endl;
+	basic.printIdeas(2);
+	
+	std::cout << "\n✅ If you see the original ideas, deep copy works!" << std::endl;
+	std::cout << "❌ If program crashes here, it was shallow copy!" << std::endl;
+
+	// Test virtual destructor importance (from test_examples/test_virtual_destructor.cpp)
+	std::cout << "\n=== Virtual Destructor Test ===" << std::endl;
+	std::cout << "Creating Dog through Animal pointer:" << std::endl;
+	Animal* animalPtr = new Dog();
+	
+	std::cout << "\nDeleting through Animal pointer (watch destructor order):" << std::endl;
+	delete animalPtr;  // Should call Dog destructor, then Brain destructor, then Animal destructor
+	
+	std::cout << "\n✅ If you saw Dog, Brain, and Animal destructors, virtual works!" << std::endl;
+	std::cout << "❌ If only Animal destructor was called, it's a memory leak!" << std::endl;
+
 	std::cout << "\n--- End of Tests ---" << std::endl;
 
 	return 0;

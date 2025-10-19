@@ -118,6 +118,50 @@ int main(void) {
 	// Test that copies are independent
 	sourceCopy->createMateria("ice");
 
+	// Test self-assignment (from test_examples/test_self_assignment.cpp)
+	std::cout << "\n=== Self-Assignment Test ===" << std::endl;
+	std::cout << "Testing self-assignment safety (character = character)" << std::endl;
+	
+	Character selfTest("SelfTest");
+	selfTest.equip(source->createMateria("ice"));
+	selfTest.equip(source->createMateria("cure"));
+	
+	std::cout << "\nBefore self-assignment:" << std::endl;
+	selfTest.printInventory();
+	
+	std::cout << "\n--- Performing self-assignment ---" << std::endl;
+	// Suppress self-assignment warning for test purposes
+	Character& ref = selfTest;
+	selfTest = ref;  // Self-assignment!
+	
+	std::cout << "\nAfter self-assignment (inventory should be unchanged):" << std::endl;
+	selfTest.printInventory();
+	
+	std::cout << "\n--- Testing that materia still works ---" << std::endl;
+	Character victim("victim");
+	selfTest.use(0, victim);  // Should work without crash
+	selfTest.use(1, victim);  // Should work without crash
+	
+	std::cout << "\n✅ If program didn't crash and materia works, self-assignment is handled correctly!" << std::endl;
+	std::cout << "❌ If program crashed, self-assignment check is missing (if (this != &other))" << std::endl;
+
+	// Test clone method
+	std::cout << "\n=== Clone Method Test ===" << std::endl;
+	AMateria* iceOriginal = new Ice();
+	AMateria* iceCloned = iceOriginal->clone();
+	
+	std::cout << "Original Ice address: " << iceOriginal << std::endl;
+	std::cout << "Cloned Ice address: " << iceCloned << std::endl;
+	
+	if (iceOriginal == iceCloned) {
+		std::cout << "❌ FAIL: clone() returned same object!" << std::endl;
+	} else {
+		std::cout << "✅ PASS: clone() created new object!" << std::endl;
+	}
+	
+	delete iceOriginal;
+	delete iceCloned;
+
 	std::cout << "\n--- Cleanup ---" << std::endl;
 	delete wizard;
 	delete healer;

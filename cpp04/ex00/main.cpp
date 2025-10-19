@@ -73,11 +73,18 @@ int main(void) {
 		animals[i]->makeSound();
 	}
 
-	// Clean up array
 	std::cout << "\nCleaning up array:" << std::endl;
 	for (int i = 0; i < 4; i++) {
 		delete animals[i];
 	}
+
+	std::cout << "\n=== Constructor/Destructor Order Test ===" << std::endl;
+	std::cout << "Creating Dog in local scope..." << std::endl;
+	{
+		Dog scopedDog;
+		std::cout << "Dog created. Exiting scope..." << std::endl;
+	}
+	std::cout << "Scope exited." << std::endl;
 
 	std::cout << "\n--- End of Tests ---" << std::endl;
 

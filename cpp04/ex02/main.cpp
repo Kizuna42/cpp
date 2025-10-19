@@ -82,6 +82,50 @@ int main(void) {
 	std::cout << "// AAnimal abstractTest;  // ERROR!" << std::endl;
 	std::cout << "This proves AAnimal is truly abstract and cannot be instantiated." << std::endl;
 
+	// Test that abstract class constructors/destructors still work
+	std::cout << "\n=== Abstract Class Constructor/Destructor Test ===" << std::endl;
+	std::cout << "Even though AAnimal is abstract, its constructor/destructor are called" << std::endl;
+	std::cout << "when creating/destroying derived classes:" << std::endl;
+	{
+		Dog testDog;
+		std::cout << "Dog created (AAnimal constructor was called first)" << std::endl;
+	}
+	std::cout << "Dog destroyed (Dog destructor called first, then AAnimal destructor)" << std::endl;
+
+	// Test Brain address verification (from Ex01)
+	std::cout << "\n=== Brain Independence Verification ===" << std::endl;
+	Dog dog1;
+	dog1.setIdea(0, "Dog1's unique thought");
+
+	Dog dog2(dog1);  // Copy constructor
+
+	std::cout << "dog1 Brain address: " << dog1.getBrain() << std::endl;
+	std::cout << "dog2 Brain address: " << dog2.getBrain() << std::endl;
+
+	if (dog1.getBrain() == dog2.getBrain()) {
+		std::cout << "❌ FAIL: Shallow copy detected!" << std::endl;
+	} else {
+		std::cout << "✅ PASS: Deep copy confirmed (each has independent Brain)!" << std::endl;
+	}
+
+	// Test pure virtual function behavior
+	std::cout << "\n=== Pure Virtual Function Test ===" << std::endl;
+	std::cout << "AAnimal has makeSound() as pure virtual (= 0)" << std::endl;
+	std::cout << "This forces Dog and Cat to implement their own makeSound():" << std::endl;
+
+	AAnimal* polymorphicDog = new Dog();
+	AAnimal* polymorphicCat = new Cat();
+
+	std::cout << "Dog says: ";
+	polymorphicDog->makeSound();
+	std::cout << "Cat says: ";
+	polymorphicCat->makeSound();
+
+	delete polymorphicDog;
+	delete polymorphicCat;
+
+	std::cout << "\n✅ Pure virtual function ensures all derived classes implement makeSound()" << std::endl;
+
 	std::cout << "\n--- End of Tests ---" << std::endl;
 
 	return 0;
