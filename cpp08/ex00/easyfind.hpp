@@ -10,9 +10,9 @@
  */
 class NotFoundException : public std::exception {
 public:
-    virtual const char* what() const throw() {
-        return "Element not found in container";
-    }
+	virtual const char* what() const throw() {
+		return "Element not found in container";
+	}
 };
 
 /*
@@ -22,13 +22,13 @@ public:
  */
 template<typename T>
 typename T::iterator easyfind(T& container, int value) {
-    typename T::iterator it = std::find(container.begin(), container.end(), value);
-    
-    if (it == container.end()) {
-        throw NotFoundException();
-    }
-    
-    return it;
+	typename T::iterator it = std::find(container.begin(), container.end(), value);
+	
+	if (it == container.end()) {
+		throw NotFoundException();
+	}
+	
+	return it;
 }
 
 /*
@@ -36,13 +36,13 @@ typename T::iterator easyfind(T& container, int value) {
  */
 template<typename T>
 typename T::const_iterator easyfind(const T& container, int value) {
-    typename T::const_iterator it = std::find(container.begin(), container.end(), value);
-    
-    if (it == container.end()) {
-        throw NotFoundException();
-    }
-    
-    return it;
+	typename T::const_iterator it = std::find(container.begin(), container.end(), value);
+	
+	if (it == container.end()) {
+		throw NotFoundException();
+	}
+	
+	return it;
 }
 
 #endif

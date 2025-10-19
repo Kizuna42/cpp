@@ -15,13 +15,13 @@
  */
 template<typename T, typename F>
 void iter(T* array, size_t length, F func) {
-    if (array == NULL) {
-        return;
-    }
-    
-    for (size_t i = 0; i < length; i++) {
-        func(array[i]);
-    }
+	if (array == NULL) {
+		return;
+	}
+	
+	for (size_t i = 0; i < length; i++) {
+		func(array[i]);
+	}
 }
 
 /*
@@ -29,43 +29,43 @@ void iter(T* array, size_t length, F func) {
  */
 template<typename T, typename F>
 void iter(const T* array, size_t length, F func) {
-    if (array == NULL) {
-        return;
-    }
-    
-    for (size_t i = 0; i < length; i++) {
-        func(array[i]);
-    }
+	if (array == NULL) {
+		return;
+	}
+	
+	for (size_t i = 0; i < length; i++) {
+		func(array[i]);
+	}
 }
 
 // Some example functions to use with iter
 template<typename T>
 void printElement(const T& element) {
-    std::cout << element << " ";
+	std::cout << element << " ";
 }
 
 template<typename T>
 void printElementWithIndex(const T& element) {
-    static size_t index = 0;
-    std::cout << "[" << index++ << "]: " << element << " ";
+	static size_t index = 0;
+	std::cout << "[" << index++ << "]: " << element << " ";
 }
 
 // Function to increment numeric values (for non-const arrays)
 template<typename T>
 void increment(T& element) {
-    ++element;
+	++element;
 }
 
 // Function to double numeric values (for non-const arrays)
 template<typename T>
 void doubleValue(T& element) {
-    element *= 2;
+	element *= 2;
 }
 
 // Function to print with newline
 template<typename T>
 void println(const T& element) {
-    std::cout << element << std::endl;
+	std::cout << element << std::endl;
 }
 
 #endif
