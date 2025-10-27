@@ -64,16 +64,12 @@ int main(void) {
 	}
 
 	std::cout << "\n--- Abstract Class Verification ---" << std::endl;
-	std::cout << "Note: The following line would cause a compilation error:" << std::endl;
 	std::cout << "// AAnimal abstractTest;  // ERROR!" << std::endl;
-	std::cout << "This proves AAnimal is truly abstract and cannot be instantiated." << std::endl;
 
 	std::cout << "\n=== Abstract Class Constructor/Destructor Test ===" << std::endl;
-	std::cout << "Even though AAnimal is abstract, its constructor/destructor are called" << std::endl;
-	std::cout << "when creating/destroying derived classes:" << std::endl;
 	{
 		Dog testDog;
-		std::cout << "Dog created (AAnimal constructor was called first)" << std::endl;
+		std::cout << "Dog created" << std::endl;
 	}
 	std::cout << "Dog destroyed (Dog destructor called first, then AAnimal destructor)" << std::endl;
 
@@ -94,8 +90,6 @@ int main(void) {
 
 	// Test pure virtual function behavior
 	std::cout << "\n=== Pure Virtual Function Test ===" << std::endl;
-	std::cout << "AAnimal has makeSound() as pure virtual (= 0)" << std::endl;
-	std::cout << "This forces Dog and Cat to implement their own makeSound():" << std::endl;
 
 	AAnimal* polymorphicDog = new Dog();
 	AAnimal* polymorphicCat = new Cat();
@@ -107,8 +101,6 @@ int main(void) {
 
 	delete polymorphicDog;
 	delete polymorphicCat;
-
-	std::cout << "\n✅ Pure virtual function ensures all derived classes implement makeSound()" << std::endl;
 
 	std::cout << "\n--- End of Tests ---" << std::endl;
 
