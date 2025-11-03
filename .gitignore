@@ -1,0 +1,74 @@
+# C++ Build Artifacts
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.so
+*.dylib
+
+# Compiled executables (common 42 project names)
+megaphone
+phonebook
+account
+test
+tests
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.vim/
+.netrwhist
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Core dumps and debugging
+core
+core.*
+*.core
+vgcore.*
+*.dSYM/
+
+# Memory debugging outputs
+valgrind-out.txt
+*.memcheck
+*.helgrind
+
+# Static analysis outputs
+cppcheck-results.xml
+*.cppcheck
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Project specific
+# (Add any project-specific files to ignore)

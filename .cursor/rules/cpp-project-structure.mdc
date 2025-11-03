@@ -1,0 +1,53 @@
+---
+alwaysApply: true
+description: Project structure and file organization for 42 C++ modules
+---
+
+# 42 C++ Project Structure
+
+## Directory Layout
+
+```
+cpp/
+├── cpp00/           # Module 00: Basic C++ concepts
+│   ├── ex00/        # Exercise 00: Megaphone
+│   ├── ex01/        # Exercise 01: PhoneBook
+│   ├── ex02/        # Exercise 02: Account
+│   ├── cpp00/       # Assignment PDF images
+│   └── ng_4_cpp_module_00/  # Evaluation criteria
+├── cpp01/           # Module 01: Memory allocation
+├── cpp02/           # Module 02: Operator overloading
+├── cpp03/           # Module 03: Inheritance
+├── cpp04/           # Module 04: Polymorphism
+├── cpp05/           # Module 05: Exceptions
+├── cpp06/           # Module 06: C++ Casts
+├── cpp07/           # Module 07: Templates
+├── cpp08/           # Module 08: STL containers
+├── cpp09/           # Module 09: STL algorithms
+└── COMPREHENSIVE_EVALUATION.md
+```
+
+## Key Files
+
+- [COMPREHENSIVE_EVALUATION.md](mdc:COMPREHENSIVE_EVALUATION.md) - Complete project evaluation
+- [README.md](mdc:README.md) - Project overview
+- Each module contains:
+  - `cppXX/` - Assignment requirements (images)
+  - `ng_4_cpp_module_XX/` - Evaluation criteria
+  - `ex00/`, `ex01/`, etc. - Exercise implementations
+
+## Exercise Structure
+
+Each exercise directory contains:
+
+- `Makefile` - Build configuration
+- `*.hpp` - Header files (class declarations)
+- `*.cpp` - Source files (class implementations)
+- `main.cpp` - Test/demo program
+- Executable (after compilation)
+
+## Assignment Requirements
+
+- Check [cpp00/cpp00/images/](mdc:cpp00/cpp00/images/) for assignment details
+- Review [cpp00/ng_4_cpp_module_00/images/](mdc:cpp00/ng_4_cpp_module_00/images/) for evaluation criteria
+- Follow exact specifications from PDF images
