@@ -1,0 +1,119 @@
+Based on the provided PDF file (Subject for C++ Module 06), here is the accurate transcription of the exercises and submission guidelines.
+
+### Chapter V
+
+### Exercise 00: Conversion of scalar types
+
+  * [cite_start]**Turn-in directory:** `ex00/` [cite: 280]
+  * [cite_start]**Files to turn in:** `Makefile, *.cpp, *.{h, hpp}` [cite: 283]
+  * **Allowed functions:** Any function to convert from a string to an int, a float, or a double. [cite_start]This will help, but won't do the whole job. [cite: 284, 285]
+
+**Instructions:**
+
+  * [cite_start]Write a class `ScalarConverter` that will contain only one static method "convert" that will take as a parameter a string representation of a C++ literal in its most common form and output its value in the following series of scalar types: [cite: 286]
+      * [cite_start]`char` [cite: 287]
+      * [cite_start]`int` [cite: 288]
+      * [cite_start]`float` [cite: 289]
+      * [cite_start]`double` [cite: 290]
+  * [cite_start]As this class doesn't need to store anything at all, it must not be instantiable by users. [cite: 291]
+  * [cite_start]Except for char parameters, only the decimal notation will be used. [cite: 292]
+  * [cite_start]Examples of char literals: `'c'`, `'a'`, ... [cite: 293]
+  * To make things simple, please note that non-displayable characters shouldn't be used as inputs. [cite_start]If a conversion to char is not displayable, print an informative message. [cite: 294, 295]
+  * [cite_start]Examples of int literals: `0`, `-42`, `42`... [cite: 296]
+  * [cite_start]Examples of float literals: `0.0f`, `-4.2f`, `4.2f`... [cite: 297]
+  * [cite_start]You have to handle these pseudo-literals as well (you know, for science): `-inff`, `+inff`, and `nanf`. [cite: 298]
+  * [cite_start]Examples of double literals: `0.0`, `-4.2`, `4.2`... [cite: 302]
+  * [cite_start]You have to handle these pseudo-literals as well (you know, for fun): `-inf`, `+inf`, and `nan`. [cite: 303]
+  * [cite_start]Write a program to test that your class works as expected. [cite: 307]
+  * [cite_start]You have to first detect the type of the literal passed as a parameter, convert it from string to its actual type, then convert it explicitly to the three other data types. [cite: 308]
+  * [cite_start]Lastly, display the results as shown below. [cite: 309]
+  * [cite_start]If a conversion does not make any sense or overflows, display a message to inform the user that the type conversion is impossible. [cite: 310]
+  * [cite_start]Include any header you need in order to handle numeric limits and special values. [cite: 311]
+
+**Example Output:**
+
+```
+./convert 0
+char: Non displayable
+int: 0
+float: 0.0f
+double: 0.0
+
+./convert nan
+char: impossible
+int: impossible
+float: nanf
+double: nan
+
+./convert 42.0f
+char: '*'
+int: 42
+float: 42.0f
+double: 42.0
+```
+
+[cite_start][cite: 312-326]
+
+-----
+
+### Chapter VI
+
+### Exercise 01: Serialization
+
+  * [cite_start]**Turn-in directory:** `ex01/` [cite: 332]
+  * [cite_start]**Files to turn in:** `Makefile, *.cpp, *.{h, hpp}` [cite: 333]
+  * [cite_start]**Forbidden functions:** None [cite: 334]
+
+**Instructions:**
+
+  * [cite_start]Implement a class `Serializer`, which will not be initializable by the user in any way, with the following static methods: [cite: 335]
+      * [cite_start]`uintptr_t serialize(Data* ptr);` [cite: 336]
+          * [cite_start]It takes a pointer and converts it to the unsigned integer type `uintptr_t`. [cite: 337]
+      * [cite_start]`Data* deserialize(uintptr_t raw);` [cite: 338]
+          * [cite_start]It takes an unsigned integer parameter and converts it to a pointer to `Data`. [cite: 339]
+  * [cite_start]Write a program to test that your class works as expected. [cite: 340]
+  * [cite_start]You must create a non-empty (meaning it has data members) `Data` structure. [cite: 341]
+  * [cite_start]Use `serialize()` on the address of the Data object and pass its return value to `deserialize()`. [cite: 342]
+  * [cite_start]Then, ensure the return value of `deserialize()` compares equal to the original pointer. [cite: 343]
+  * [cite_start]Do not forget to turn in the files of your Data structure. [cite: 344]
+
+-----
+
+### Chapter VII
+
+### Exercise 02: Identify real type
+
+  * [cite_start]**Turn-in directory:** `ex02/` [cite: 348]
+  * [cite_start]**Files to turn in:** `Makefile, *.cpp, *.{h, hpp}` [cite: 351]
+  * [cite_start]**Forbidden functions:** `std::typeinfo` [cite: 352]
+
+**Instructions:**
+
+  * [cite_start]Implement a `Base` class that has a public virtual destructor only. [cite: 353]
+  * [cite_start]Create three empty classes `A`, `B`, and `C`, that publicly inherit from `Base`. [cite: 354]
+  * [cite_start]These four classes don't have to be designed in the Orthodox Canonical Form. [cite: 356]
+  * [cite_start]Implement the following functions: [cite: 357]
+      * [cite_start]`Base * generate(void);` [cite: 358]
+          * It randomly instantiates A, B, or C and returns the instance as a Base pointer. [cite_start]Feel free to use anything you like for the random choice implementation. [cite: 359, 360]
+      * [cite_start]`void identify(Base* p);` [cite: 361]
+          * [cite_start]It prints the actual type of the object pointed to by p: "A", "B", or "C". [cite: 362]
+      * [cite_start]`void identify(Base& p);` [cite: 363]
+          * [cite_start]It prints the actual type of the object referenced by p: "A", "B", or "C". [cite: 364]
+          * [cite_start]Using a pointer inside this function is forbidden. [cite: 365]
+  * [cite_start]Including the `typeinfo` header is forbidden. [cite: 366]
+  * [cite_start]Write a program to test that everything works as expected. [cite: 367]
+
+-----
+
+### Chapter VIII
+
+### Submission and Peer Evaluation
+
+  * Submit your assignment to your Git repository as usual. [cite_start]Only the work inside your repository will be evaluated during the defense. [cite: 371]
+  * [cite_start]Don't hesitate to double-check the names of your folders and files to ensure they are correct. [cite: 372]
+  * [cite_start]During the evaluation, a brief modification of the project may occasionally be requested. [cite: 373]
+  * [cite_start]This could involve a minor behavior change, a few lines of code to write or rewrite, or an easy-to-add feature. [cite: 374]
+  * [cite_start]While this step may not be applicable to every project, you must be prepared for it if it is mentioned in the evaluation guidelines. [cite: 375]
+  * [cite_start]This step is meant to verify your actual understanding of a specific part of the project. [cite: 376]
+  * [cite_start]The modification can be performed in any development environment you choose (e.g., your usual setup), and it should be feasible within a few minutes unless a specific timeframe is defined as part of the evaluation. [cite: 377-379]
+  * [cite_start]You can, for example, be asked to make a small update to a function or script, modify a display, or adjust a data structure to store new information, etc. [cite: 380]

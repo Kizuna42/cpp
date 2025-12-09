@@ -61,11 +61,8 @@ int main(void) {
 	Base* nullPtr = NULL;
 	identify(nullPtr);  // Should handle NULL gracefully
 	
-	// Test 5: Base class pointer to base instance
-	std::cout << "\n--- Test 5: Base class instance (if possible) ---" << std::endl;
-	
-	// Note: Base has pure virtual destructor, so we can't instantiate it directly
-	// But we can test with a derived class assigned to Base pointer
+	// Test 5: Base class pointer to derived instance
+	std::cout << "\n--- Test 5: Base class pointer to derived instance ---" << std::endl;
 	
 	Base* basePtr = new A();
 	std::cout << "Base* pointing to A instance:" << std::endl;

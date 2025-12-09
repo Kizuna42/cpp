@@ -44,6 +44,12 @@ test: $(NAME)
 	@./$(NAME) "'a'"
 	@echo "\nTesting integer: 42"
 	@./$(NAME) "42"
+	@echo "\nTesting int boundary: INT_MIN"
+	@./$(NAME) "-2147483648"
+	@echo "\nTesting int boundary: INT_MAX"
+	@./$(NAME) "2147483647"
+	@echo "\nTesting non-displayable char via int 31"
+	@./$(NAME) "31"
 	@echo "\nTesting float: 42.42f"
 	@./$(NAME) "42.42f"
 	@echo "\nTesting double: 42.42"
@@ -52,6 +58,10 @@ test: $(NAME)
 	@./$(NAME) "nan"
 	@echo "\nTesting special: +inff"
 	@./$(NAME) "+inff"
+	@echo "\nTesting overflow int -> invalid literal"
+	@./$(NAME) "999999999999999999999"
+	@echo "\nTesting invalid format"
+	@./$(NAME) "abc123"
 
 .PHONY: all clean fclean re test
 

@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <stdint.h>
+#include <string>
 
 struct Data {
 	int value;

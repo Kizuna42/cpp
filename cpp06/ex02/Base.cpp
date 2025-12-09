@@ -8,7 +8,7 @@ Base* generate(void) {
 	// Initialize random seed once
 	static bool initialized = false;
 	if (!initialized) {
-		std::srand(std::time(0));
+		std::srand(static_cast<unsigned int>(std::time(0)));
 		initialized = true;
 	}
 	

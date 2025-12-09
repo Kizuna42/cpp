@@ -1,7 +1,12 @@
 #include "Serializer.hpp"
 
+static void printCheck(const std::string& label, bool ok) {
+	std::cout << label << ": " << (ok ? "PASS" : "FAIL") << std::endl;
+}
+
 int main(void) {
 	std::cout << "=== CPP06 ex01: Serialization and Deserialization ===" << std::endl;
+	std::cout << std::boolalpha;
 	
 	// Test 1: Basic serialization and deserialization
 	std::cout << "\n--- Test 1: Basic serialization/deserialization ---" << std::endl;
@@ -23,10 +28,10 @@ int main(void) {
 	std::cout << "\nPointer comparison:" << std::endl;
 	std::cout << "Original pointer:    " << &originalData << std::endl;
 	std::cout << "Deserialized pointer: " << deserializedPtr << std::endl;
-	std::cout << "Pointers equal: " << (&originalData == deserializedPtr ? "YES" : "NO") << std::endl;
+	printCheck("Pointers equal", &originalData == deserializedPtr);
 	
 	// Verify data equality
-	std::cout << "Data content equal: " << (originalData == *deserializedPtr ? "YES" : "NO") << std::endl;
+	printCheck("Data content equal", originalData == *deserializedPtr);
 	
 	// Test 2: Multiple objects
 	std::cout << "\n--- Test 2: Multiple objects ---" << std::endl;
@@ -52,8 +57,8 @@ int main(void) {
 		std::cout << "\nObject " << i + 1 << ":" << std::endl;
 		std::cout << "Original pointer:     " << objects[i] << std::endl;
 		std::cout << "Deserialized pointer: " << deserializedPtr << std::endl;
-		std::cout << "Pointers match: " << (objects[i] == deserializedPtr ? "YES" : "NO") << std::endl;
-		std::cout << "Data matches: " << (*objects[i] == *deserializedPtr ? "YES" : "NO") << std::endl;
+		printCheck("Pointers match", objects[i] == deserializedPtr);
+		printCheck("Data matches", *objects[i] == *deserializedPtr);
 	}
 	
 	// Test 3: Modifying data through deserialized pointer
@@ -74,6 +79,7 @@ int main(void) {
 	
 	std::cout << "\nAfter modification through deserialized pointer:" << std::endl;
 	testData.display();  // Original object should be modified
+	printCheck("Modification reflected", testData == *testPtr);
 	
 	// Test 4: NULL pointer handling
 	std::cout << "\n--- Test 4: NULL pointer handling ---" << std::endl;
@@ -84,7 +90,7 @@ int main(void) {
 	
 	std::cout << "NULL pointer serialized to: " << serializedNull << std::endl;
 	std::cout << "Deserialized NULL pointer: " << deserializedNull << std::endl;
-	std::cout << "NULL pointers match: " << (nullPtr == deserializedNull ? "YES" : "NO") << std::endl;
+	printCheck("NULL pointers match", nullPtr == deserializedNull);
 	
 	// Test 5: Stack vs Heap objects
 	std::cout << "\n--- Test 5: Stack vs Heap objects ---" << std::endl;
@@ -97,7 +103,7 @@ int main(void) {
 	std::cout << "Stack object:" << std::endl;
 	std::cout << "Original:     " << &stackData << std::endl;
 	std::cout << "Deserialized: " << stackDeserialized << std::endl;
-	std::cout << "Match: " << (&stackData == stackDeserialized ? "YES" : "NO") << std::endl;
+	printCheck("Match", &stackData == stackDeserialized);
 	
 	// Heap object
 	Data* heapData = new Data(777, "Heap object", 77.77, false);
@@ -107,7 +113,7 @@ int main(void) {
 	std::cout << "\nHeap object:" << std::endl;
 	std::cout << "Original:     " << heapData << std::endl;
 	std::cout << "Deserialized: " << heapDeserialized << std::endl;
-	std::cout << "Match: " << (heapData == heapDeserialized ? "YES" : "NO") << std::endl;
+	printCheck("Match", heapData == heapDeserialized);
 	
 	// Clean up heap memory
 	delete heapData;
