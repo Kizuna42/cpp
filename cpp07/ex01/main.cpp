@@ -1,6 +1,25 @@
 #include "iter.hpp"
 #include <string>
 
+class Awesome {
+private:
+	int _n;
+
+public:
+	Awesome(void) : _n(42) {}
+	int get(void) const { return _n; }
+};
+
+std::ostream& operator<<(std::ostream& o, Awesome const& rhs) {
+	o << rhs.get();
+	return o;
+}
+
+template<typename T>
+void print(const T& x) {
+	std::cout << x << std::endl;
+}
+
 // Custom function for testing
 void toUpper(char& c) {
 	if (c >= 'a' && c <= 'z') {
@@ -153,6 +172,15 @@ int main(void) {
 		std::cout << "With index printing: ";
 		::iter(testArray, size, printElementWithIndex<int>);
 		std::cout << std::endl;
+	}
+
+	// Test 9: Subject Awesome test (works with complex types)
+	std::cout << "\n--- Test 9: Subject Awesome test ---" << std::endl;
+	{
+		int tab[] = {0, 1, 2, 3, 4};
+		Awesome tab2[5];
+		::iter(tab, 5, print<int>);
+		::iter(tab2, 5, print<Awesome>);
 	}
 	
 	std::cout << "\n=== End of tests ===" << std::endl;

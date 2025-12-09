@@ -1,6 +1,31 @@
 #include "whatever.hpp"
 #include <string>
 
+class Awesome {
+private:
+	int _n;
+
+public:
+	Awesome(void) : _n(0) {}
+	Awesome(int n) : _n(n) {}
+	Awesome& operator=(const Awesome& other) {
+		_n = other._n;
+		return *this;
+	}
+	bool operator==(Awesome const& rhs) const { return _n == rhs._n; }
+	bool operator!=(Awesome const& rhs) const { return _n != rhs._n; }
+	bool operator>(Awesome const& rhs) const { return _n > rhs._n; }
+	bool operator<(Awesome const& rhs) const { return _n < rhs._n; }
+	bool operator>=(Awesome const& rhs) const { return _n >= rhs._n; }
+	bool operator<=(Awesome const& rhs) const { return _n <= rhs._n; }
+	int get_n() const { return _n; }
+};
+
+std::ostream& operator<<(std::ostream& o, const Awesome& a) {
+	o << a.get_n();
+	return o;
+}
+
 int main(void) {
 	std::cout << "=== CPP07 ex00: Template Functions ===" << std::endl;
 	
@@ -107,6 +132,18 @@ int main(void) {
 		std::cout << "max(const_a, const_b) = " << ::max(const_a, const_b) << std::endl;
 		
 		// Note: We can't test swap with const values as it would modify them
+	}
+
+	// Test 9: Awesome class (complex type)
+	std::cout << "\n--- Test 9: Awesome class (complex type) ---" << std::endl;
+	{
+		Awesome a(2);
+		Awesome b(4);
+		std::cout << "a = " << a << ", b = " << b << std::endl;
+		::swap(a, b);
+		std::cout << "after swap a = " << a << ", b = " << b << std::endl;
+		std::cout << "max(a, b) = " << ::max(a, b) << std::endl;
+		std::cout << "min(a, b) = " << ::min(a, b) << std::endl;
 	}
 	
 	std::cout << "\n=== End of tests ===" << std::endl;

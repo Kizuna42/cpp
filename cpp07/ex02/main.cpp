@@ -1,6 +1,25 @@
 #include "Array.hpp"
 #include <string>
 
+class Awesome {
+private:
+	int _n;
+
+public:
+	Awesome(void) : _n(0) {}
+	Awesome(int n) : _n(n) {}
+	Awesome& operator=(const Awesome& other) {
+		_n = other._n;
+		return *this;
+	}
+	int get(void) const { return _n; }
+};
+
+std::ostream& operator<<(std::ostream& o, const Awesome& a) {
+	o << a.get();
+	return o;
+}
+
 int main(void) {
 	std::cout << "=== CPP07 ex02: Template Array Class ===" << std::endl;
 	
@@ -45,6 +64,19 @@ int main(void) {
 		std::cout << "String array contents: ";
 		stringArray.display();
 		
+	} catch (const std::exception& e) {
+		std::cout << "Exception: " << e.what() << std::endl;
+	}
+
+	// Test 3b: Awesome array (complex type)
+	std::cout << "\n--- Test 3b: Awesome array (complex type) ---" << std::endl;
+	try {
+		Array<Awesome> awesomeArray(3);
+		for (size_t i = 0; i < awesomeArray.size(); i++) {
+			awesomeArray[i] = Awesome(static_cast<int>(i * 10));
+		}
+		std::cout << "Awesome array contents: ";
+		awesomeArray.display();
 	} catch (const std::exception& e) {
 		std::cout << "Exception: " << e.what() << std::endl;
 	}
