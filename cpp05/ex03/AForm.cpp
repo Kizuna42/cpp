@@ -67,8 +67,7 @@ void AForm::beSigned(const Bureaucrat& bureaucrat) {
 		throw GradeTooLowException();
 	}
 	if (_isSigned) {
-		std::cout << "AForm " << _name << " is already signed!" << std::endl;
-		return;
+		throw AlreadySignedException();
 	}
 	_isSigned = true;
 	std::cout << "AForm " << _name << " has been signed by " << bureaucrat.getName() << std::endl;
@@ -97,6 +96,10 @@ const char* AForm::GradeTooLowException::what() const throw() {
 
 const char* AForm::FormNotSignedException::what() const throw() {
 	return "Form is not signed!";
+}
+
+const char* AForm::AlreadySignedException::what() const throw() {
+	return "Form is already signed!";
 }
 
 // Non-member functions

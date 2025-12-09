@@ -1,0 +1,90 @@
+### Introduction & Guidelines
+評価プロセス全体の指針およびメモリリークに関する確認事項です。
+
+* Remain polite, courteous, respectful and constructive throughout the evaluation process. [cite_start]The well-being of the community depends on it. [cite: 12]
+* Identify with the student or group whose work is evaluated the possible dysfunctions in their project. [cite_start]Take the time to discuss and debate the problems that may have been identified. [cite: 13, 14]
+* You must consider that there might be some differences in how your peers might have understood the project's instructions and the scope of its functionalities. [cite_start]Always keep an open mind and grade them as honestly as possible. [cite: 15, 16]
+* [cite_start]The pedagogy is useful only and only if the peer-evaluation is done seriously. [cite: 17]
+* [cite_start]Only grade the work that was turned in the Git repository of the evaluated student or group. [cite: 19]
+* Double-check that the Git repository belongs to the student(s). Ensure that the project is the one expected. [cite_start]Also, check that 'git clone' is used in an empty folder. [cite: 20, 21]
+* [cite_start]Check carefully that no malicious aliases was used to fool you and make you evaluate something that is not the content of the official repository. [cite: 22]
+* [cite_start]To avoid any surprises and if applicable, review together any scripts used to facilitate the grading (scripts for testing or automation). [cite: 23, 29]
+* [cite_start]If you have not completed the assignment you are going to evaluate, you have to read the entire subject prior to starting the evaluation process. [cite: 30, 31]
+* Use the available flags to report an empty repository, a non-functioning program, a Norm error, cheating, and so forth. [cite_start]In these cases, the evaluation process ends and the final grade is 0, or -42 in case of cheating. [cite: 32, 33]
+* [cite_start]However, except for cheating, student are strongly encouraged to review together the work that was turned in, in order to identify any mistakes that shouldn't be repeated in the future. [cite: 34]
+* You should never have to edit any file except the configuration file if it exists. [cite_start]If you want to edit a file, take the time to explicit the reasons with the evaluated student and make sure both of you are okay with this. [cite: 35, 36]
+* You must also verify the absence of memory leaks. [cite_start]Any memory allocated on the heap must be properly freed before the end of execution. [cite: 37, 38]
+* You are allowed to use any of the different tools available on the computer, such as leaks, valgrind, or e_fence. [cite_start]In case of memory leaks, tick the appropriate flag. [cite: 39, 40]
+
+### Prerequisites
+コンパイル条件や禁止事項に関する重要な前提条件です。
+
+* [cite_start]The code must compile with c++ and the flags-Wall -Wextra -Werror [cite: 47]
+* Don't forget this project has to follow the $C++98$ standard. [cite_start]Thus, C++11 (and later) functions or containers are NOT expected. [cite: 48, 49]
+* Any of these means you must not grade the exercise in question:
+    * A function is implemented in a header file (except for template functions).
+    * [cite_start]A Makefile compiles without the required flags and/or another compiler than $c^{++}$. [cite: 50, 51]
+* Any of these means that you must flag the project with "Forbidden Function":
+    * Use of a "C" function (*alloc, *printf, free).
+    * Use of a function not allowed in the exercise guidelines.
+    * Use of "using namespace" or the "friend" keyword.
+    * [cite_start]Use of an external library, or features from versions other than $C++98$. [cite: 52, 53, 54, 59]
+
+### Ex00: Mommy, when I grow up, I want to be a bureaucrat!
+Exercise 00 の評価項目です。
+
+* As usual, there has to be the main function that contains enough tests to prove the program works as expected. If there isn't, do not grade this exercise. [cite_start]If any non-interface class is not in orthodox canonical class form, do not grade this exercise. [cite: 63, 64]
+
+**Bureaucrat**
+* [cite_start]There is a Makefile that compiles using the appropriate flags. [cite: 66]
+* There is a Bureaucrat class. [cite_start]It has a constant name. [cite: 67]
+* [cite_start]It has a grade that ranges from 1 (highest) to 150 (lowest). [cite: 68]
+* [cite_start]Exceptions are thrown when trying to create a Bureaucrat with a grade that is too high or too low. [cite: 69, 70]
+* [cite_start]There are accessors for the attributes. [cite: 71]
+* [cite_start]There are functions to increment / decrement the grade, [cite: 72]
+* They throw exceptions when it's appropriate. [cite_start]Remember that incrementing a grade 3 will give you a grade 2 (1 is the highest). [cite: 73, 74]
+* [cite_start]The exceptions that are used inherit from std::exception, or from something derived from std::exception (i.e. they are catchable as std::exception & e).. [cite: 75]
+* [cite_start]There is a << operator to ostream overload that outputs the info of the Bureaucrat. [cite: 76]
+
+### Ex01: Form up, maggots!
+Exercise 01 の評価項目です。
+
+* As usual, there has to be the main function that contains enough tests to prove the program works as expected. If there isn't, do not grade this exercise. [cite_start]If any non-interface class is not in orthodox canonical class form, do not grade this exercise. [cite: 80, 81, 82]
+
+**Form**
+* [cite_start]There is a Makefile that compiles using the appropriate flags. [cite: 84]
+* [cite_start]There is a Form class. [cite: 85]
+* [cite_start]It has a name, a bool that indicates whether is it signed (at the beginning it's not), a grade required to sign it, and a grade required to execute it. [cite: 86]
+* [cite_start]The names and grades are constant. [cite: 90]
+* [cite_start]All these attributes are private and not protected. [cite: 91]
+* [cite_start]The grades of the forms follow the same constraints as the Bureaucrat's (exceptions, $1=$ highest $150=$ lowest, and so forth). [cite: 93, 94]
+* [cite_start]There are accessors for the attributes and a << operator to ostream overload that displays the complete state of the Form. [cite: 95, 96]
+* [cite_start]There is a Form::beSigned() member function that works as described by the subject. [cite: 97, 98]
+* [cite_start]There is a Bureaucrat::sign Form() function that works as described by the subject. [cite: 99]
+
+### Ex02: No, you need form 28B, not 28C...
+Exercise 02 の評価項目です。
+
+* As usual, there has to be the main function that contains enough tests to prove the program works as expected. If there isn't, do not grade this exercise. [cite_start]If any non-interface class is not in orthodox canonical class form, do not grade this exercise. [cite: 103, 104]
+
+**Forms that actually do something**
+* [cite_start]There is a Makefile that compiles using the appropriate flags. [cite: 106]
+* [cite_start]There are concrete forms that are conform to the specifications of the subject (required grades, names and actions). [cite: 107]
+* [cite_start]They take only one parameter in their constructor, which is their target. [cite: 108]
+* [cite_start]There is a Form::execute(Bureaucrat const & executor) method that works as specified by the subject. [cite: 109]
+* [cite_start]Either this method is pure and the grade checks are implemented in each subclass, or this method performs the checks, then calls another method in derived class that only executes the action. [cite: 110]
+* [cite_start]Both of these techniques are valid. [cite: 111]
+* [cite_start]There is a Bureaucrat::execute Form (Form const & form) that works as specified by the subject. [cite: 112]
+
+### Ex03: At least this beats coffee-making
+Exercise 03 の評価項目です。
+
+* As usual, there has to be the main function that contains enough tests to prove the program works as expected. If there isn't, do not grade this exercise. [cite_start]If any non-interface class is not in orthodox canonical class form, do not grade this exercise. [cite: 116, 117]
+
+**Intern**
+* There is a Makefile that compiles using the appropriate flags. [cite_start]There is an Intern class. [cite: 123]
+* [cite_start]It has a makeForm() function that works as specified by the subject. [cite: 124]
+
+**Good dispatching**
+* [cite_start]The makeForm() function should use some kind of array of pointers to member functions to handle the creation of Forms. [cite: 128]
+* [cite_start]If it's using an unclean method, like if/elseif/elseif/else branchings, or some other ugly stuff like this, please count this as wrong. [cite: 129]

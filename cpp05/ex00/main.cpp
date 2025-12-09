@@ -1,4 +1,5 @@
 #include "Bureaucrat.hpp"
+#include <sstream>
 
 int main(void) {
 	std::cout << "=== CPP05 ex00: Bureaucrat Exception Testing ===" << std::endl;
@@ -86,6 +87,14 @@ int main(void) {
 
 	} catch (const std::exception& e) {
 		std::cout << "Caught exception: " << e.what() << std::endl;
+	}
+
+	std::cout << "\n--- Test 9: operator<< format ---" << std::endl;
+	{
+		Bureaucrat sample("FormatCheck", 42);
+		std::ostringstream oss;
+		oss << sample;
+		std::cout << "Streamed: [" << oss.str() << "]" << std::endl;
 	}
 
 	std::cout << "\n=== End of tests ===" << std::endl;
