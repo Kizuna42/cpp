@@ -2,16 +2,13 @@
 
 // Constructors
 BitcoinExchange::BitcoinExchange(void) {
-	std::cout << "BitcoinExchange: Default constructor called" << std::endl;
 }
 
 BitcoinExchange::BitcoinExchange(const BitcoinExchange& other) : _exchangeRates(other._exchangeRates) {
-	std::cout << "BitcoinExchange: Copy constructor called" << std::endl;
 }
 
 // Assignment operator
 BitcoinExchange& BitcoinExchange::operator=(const BitcoinExchange& other) {
-	std::cout << "BitcoinExchange: Assignment operator called" << std::endl;
 	if (this != &other) {
 		_exchangeRates = other._exchangeRates;
 	}
@@ -20,7 +17,6 @@ BitcoinExchange& BitcoinExchange::operator=(const BitcoinExchange& other) {
 
 // Destructor
 BitcoinExchange::~BitcoinExchange(void) {
-	std::cout << "BitcoinExchange: Destructor called" << std::endl;
 }
 
 // Helper functions
@@ -143,7 +139,6 @@ void BitcoinExchange::loadDatabase(const std::string& filename) {
 	}
 	
 	file.close();
-	std::cout << "Loaded " << _exchangeRates.size() << " exchange rates from database" << std::endl;
 }
 
 double BitcoinExchange::getExchangeRate(const std::string& date) const {
@@ -223,7 +218,16 @@ void BitcoinExchange::processInput(const std::string& filename) {
 		try {
 			double rate = getExchangeRate(date);
 			double result = value * rate;
-			std::cout << date << " => " << value << " = " << std::fixed << std::setprecision(2) << result << std::endl;
+			// Remove trailing zeros and unnecessary decimal points
+			std::ostringstream oss;
+			oss << std::fixed << std::setprecision(10) << result;
+			std::string resultStr = oss.str();
+			// Remove trailing zeros
+			resultStr.erase(resultStr.find_last_not_of('0') + 1, std::string::npos);
+			if (resultStr[resultStr.length() - 1] == '.') {
+				resultStr.erase(resultStr.length() - 1);
+			}
+			std::cout << date << " => " << value << " = " << resultStr << std::endl;
 		} catch (const InvalidValueException& e) {
 			std::cout << "Error: " << e.what() << std::endl;
 		}
@@ -232,18 +236,6 @@ void BitcoinExchange::processInput(const std::string& filename) {
 	file.close();
 }
 
-void BitcoinExchange::displayDatabase(void) const {
-	std::cout << "Exchange Rate Database (" << _exchangeRates.size() << " entries):" << std::endl;
-	int count = 0;
-	for (std::map<std::string, double>::const_iterator it = _exchangeRates.begin(); 
-		 it != _exchangeRates.end(); ++it) {
-		std::cout << it->first << " => " << std::fixed << std::setprecision(2) << it->second << std::endl;
-		if (++count >= 10) {
-			std::cout << "... (showing first 10 entries)" << std::endl;
-			break;
-		}
-	}
-}
 
 
 

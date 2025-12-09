@@ -2,16 +2,13 @@
 
 // Constructors
 RPN::RPN(void) {
-	std::cout << "RPN: Default constructor called" << std::endl;
 }
 
 RPN::RPN(const RPN& other) : _operands(other._operands) {
-	std::cout << "RPN: Copy constructor called" << std::endl;
 }
 
 // Assignment operator
 RPN& RPN::operator=(const RPN& other) {
-	std::cout << "RPN: Assignment operator called" << std::endl;
 	if (this != &other) {
 		_operands = other._operands;
 	}
@@ -20,7 +17,6 @@ RPN& RPN::operator=(const RPN& other) {
 
 // Destructor
 RPN::~RPN(void) {
-	std::cout << "RPN: Destructor called" << std::endl;
 }
 
 // Helper functions
@@ -95,8 +91,11 @@ double RPN::performOperation(double operand2, double operand1, const std::string
 void RPN::processToken(const std::string& token) {
 	if (isNumber(token)) {
 		double value = stringToDouble(token);
+		// Check if input number is less than 10 (as per subject requirement)
+		if (value >= 10) {
+			throw InvalidExpressionException("Number must be less than 10");
+		}
 		_operands.push(value);
-		std::cout << "Pushed: " << value << " (stack size: " << _operands.size() << ")" << std::endl;
 	} else if (isOperator(token)) {
 		if (_operands.size() < 2) {
 			throw InsufficientOperandsException();
@@ -107,12 +106,8 @@ void RPN::processToken(const std::string& token) {
 		double operand1 = _operands.top();
 		_operands.pop();
 		
-		std::cout << "Operation: " << operand1 << " " << token << " " << operand2;
-		
 		double result = performOperation(operand2, operand1, token);
 		_operands.push(result);
-		
-		std::cout << " = " << result << " (stack size: " << _operands.size() << ")" << std::endl;
 	} else {
 		throw InvalidExpressionException("Invalid token: " + token);
 	}
@@ -129,18 +124,15 @@ double RPN::evaluate(const std::string& expression) {
 	std::istringstream iss(expression);
 	std::string token;
 	
-	std::cout << "Evaluating RPN expression: " << expression << std::endl;
-	
 	while (iss >> token) {
 		processToken(token);
 	}
 	
 	if (_operands.size() != 1) {
-		throw InvalidExpressionException("Invalid expression: stack should contain exactly one result");
+		throw InvalidExpressionException("Invalid expression");
 	}
 	
 	double result = _operands.top();
-	std::cout << "Final result: " << result << std::endl;
 	return result;
 }
 
@@ -151,33 +143,6 @@ void RPN::reset(void) {
 	}
 }
 
-// Utility functions
-void RPN::displayStack(void) const {
-	std::stack<double> temp = _operands;
-	std::stack<double> display;
-	
-	// Reverse the stack for bottom-to-top display
-	while (!temp.empty()) {
-		display.push(temp.top());
-		temp.pop();
-	}
-	
-	std::cout << "Stack[" << _operands.size() << "]: {";
-	bool first = true;
-	while (!display.empty()) {
-		if (!first) {
-			std::cout << ", ";
-		}
-		std::cout << display.top();
-		display.pop();
-		first = false;
-	}
-	std::cout << "} (bottom -> top)" << std::endl;
-}
-
-size_t RPN::stackSize(void) const {
-	return _operands.size();
-}
 
 
 

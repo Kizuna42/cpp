@@ -33,7 +33,6 @@ public:
 	void loadDatabase(const std::string& filename);
 	void processInput(const std::string& filename);
 	double getExchangeRate(const std::string& date) const;
-	void displayDatabase(void) const;
 	
 	// Exception classes
 	class FileException : public std::exception {

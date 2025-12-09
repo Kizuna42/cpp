@@ -2,18 +2,15 @@
 
 // Constructors
 PmergeMe::PmergeMe(void) : _vectorTime(0), _dequeTime(0) {
-	std::cout << "PmergeMe: Default constructor called" << std::endl;
 }
 
 PmergeMe::PmergeMe(const PmergeMe& other) 
 	: _vectorData(other._vectorData), _dequeData(other._dequeData),
 	  _vectorTime(other._vectorTime), _dequeTime(other._dequeTime) {
-	std::cout << "PmergeMe: Copy constructor called" << std::endl;
 }
 
 // Assignment operator
 PmergeMe& PmergeMe::operator=(const PmergeMe& other) {
-	std::cout << "PmergeMe: Assignment operator called" << std::endl;
 	if (this != &other) {
 		_vectorData = other._vectorData;
 		_dequeData = other._dequeData;
@@ -25,7 +22,6 @@ PmergeMe& PmergeMe::operator=(const PmergeMe& other) {
 
 // Destructor
 PmergeMe::~PmergeMe(void) {
-	std::cout << "PmergeMe: Destructor called" << std::endl;
 }
 
 // Utility functions
@@ -65,30 +61,9 @@ int PmergeMe::stringToInt(const std::string& str) const {
 }
 
 double PmergeMe::clockToMilliseconds(clock_t clocks) const {
-	return (static_cast<double>(clocks) / CLOCKS_PER_SEC) * 1000.0;
+	return (static_cast<double>(clocks) / CLOCKS_PER_SEC) * 1000000.0;  // Convert to microseconds
 }
 
-void PmergeMe::displayContainer(const std::vector<int>& container, const std::string& name) const {
-	std::cout << name << ": ";
-	for (size_t i = 0; i < container.size() && i < 10; i++) {
-		std::cout << container[i] << " ";
-	}
-	if (container.size() > 10) {
-		std::cout << "[...]";
-	}
-	std::cout << std::endl;
-}
-
-void PmergeMe::displayContainer(const std::deque<int>& container, const std::string& name) const {
-	std::cout << name << ": ";
-	for (size_t i = 0; i < container.size() && i < 10; i++) {
-		std::cout << container[i] << " ";
-	}
-	if (container.size() > 10) {
-		std::cout << "[...]";
-	}
-	std::cout << std::endl;
-}
 
 // Vector sorting algorithms
 void PmergeMe::insertionSortVector(std::vector<int>& arr, int left, int right) {
@@ -230,7 +205,6 @@ void PmergeMe::parseInput(int argc, char** argv) {
 		_dequeData.push_back(value);
 	}
 	
-	std::cout << "Parsed " << _vectorData.size() << " numbers successfully" << std::endl;
 }
 
 void PmergeMe::sortVector(void) {
@@ -258,16 +232,22 @@ void PmergeMe::sortDeque(void) {
 }
 
 void PmergeMe::displayResults(void) const {
-	displayContainer(_vectorData, "After (vector)");
-	displayContainer(_dequeData, "After (deque)");
+	std::cout << "After: ";
+	for (size_t i = 0; i < _vectorData.size() && i < 10; i++) {
+		std::cout << _vectorData[i] << " ";
+	}
+	if (_vectorData.size() > 10) {
+		std::cout << "[...]";
+	}
+	std::cout << std::endl;
 }
 
 void PmergeMe::displayTiming(void) const {
 	std::cout << std::fixed << std::setprecision(5);
 	std::cout << "Time to process a range of " << _vectorData.size() 
-			  << " elements with std::vector : " << clockToMilliseconds(_vectorTime) << " ms" << std::endl;
+			  << " elements with std::vector : " << clockToMilliseconds(_vectorTime) << " us" << std::endl;
 	std::cout << "Time to process a range of " << _dequeData.size() 
-			  << " elements with std::deque  : " << clockToMilliseconds(_dequeTime) << " ms" << std::endl;
+			  << " elements with std::deque  : " << clockToMilliseconds(_dequeTime) << " us" << std::endl;
 }
 
 // Utility functions
@@ -286,6 +266,14 @@ bool PmergeMe::isSorted(void) const {
 		}
 	}
 	return true;
+}
+
+const std::vector<int>& PmergeMe::getVectorData(void) const {
+	return _vectorData;
+}
+
+const std::deque<int>& PmergeMe::getDequeData(void) const {
+	return _dequeData;
 }
 
 

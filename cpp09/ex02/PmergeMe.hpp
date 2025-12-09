@@ -33,8 +33,6 @@ private:
 	// Utility functions
 	bool isValidNumber(const std::string& str) const;
 	int stringToInt(const std::string& str) const;
-	void displayContainer(const std::vector<int>& container, const std::string& name) const;
-	void displayContainer(const std::deque<int>& container, const std::string& name) const;
 	double clockToMilliseconds(clock_t clocks) const;
 
 public:
@@ -55,6 +53,8 @@ public:
 	size_t getSize(void) const;
 	bool isEmpty(void) const;
 	bool isSorted(void) const;
+	const std::vector<int>& getVectorData(void) const;
+	const std::deque<int>& getDequeData(void) const;
 	
 	// Exception classes
 	class InvalidInputException : public std::exception {

@@ -31,10 +31,6 @@ public:
 	double evaluate(const std::string& expression);
 	void reset(void);
 	
-	// Utility functions
-	void displayStack(void) const;
-	size_t stackSize(void) const;
-	
 	// Exception classes
 	class InvalidExpressionException : public std::exception {
 	private:
