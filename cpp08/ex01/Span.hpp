@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <exception>
+#include <stdexcept>
 #include <numeric>
 #include <climits>
 
