@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+# minishell
+=======
 # 42 School C++ Modules 00-04
 
 ## 概要
