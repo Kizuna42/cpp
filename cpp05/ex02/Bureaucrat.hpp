@@ -5,7 +5,7 @@
 #include <string>
 #include <exception>
 
-class AForm;  // Forward declaration
+class AForm;
 
 class Bureaucrat {
 private:
@@ -16,26 +16,21 @@ private:
 	static const int LOWEST_GRADE = 150;
 
 public:
-	// Orthodox Canonical Form
 	Bureaucrat(void);
 	Bureaucrat(const std::string& name, int grade);
 	Bureaucrat(const Bureaucrat& other);
 	Bureaucrat& operator=(const Bureaucrat& other);
 	~Bureaucrat(void);
 	
-	// Getters
 	const std::string& getName(void) const;
 	int getGrade(void) const;
 	
-	// Grade manipulation
 	void incrementGrade(void);
 	void decrementGrade(void);
 	
-	// Form-related functionality
 	void signForm(AForm& form);
-	void executeForm(const AForm& form);
+	void executeForm(const AForm& form) const;
 	
-	// Exception classes
 	class GradeTooHighException : public std::exception {
 	public:
 		virtual const char* what() const throw();
@@ -47,11 +42,8 @@ public:
 	};
 };
 
-// Non-member functions
 std::ostream& operator<<(std::ostream& out, const Bureaucrat& bureaucrat);
 
 #endif
-
-
 
 

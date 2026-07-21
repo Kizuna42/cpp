@@ -2,7 +2,6 @@
 #include "Form.hpp"
 
 Bureaucrat::Bureaucrat(void) : _name("Default"), _grade(LOWEST_GRADE) {
-	std::cout << "Default bureaucrat created with grade " << _grade << std::endl;
 }
 
 Bureaucrat::Bureaucrat(const std::string& name, int grade) : _name(name) {
@@ -13,23 +12,19 @@ Bureaucrat::Bureaucrat(const std::string& name, int grade) : _name(name) {
 		throw GradeTooLowException();
 	}
 	_grade = grade;
-	std::cout << "Bureaucrat " << _name << " created with grade " << _grade << std::endl;
 }
 
 Bureaucrat::Bureaucrat(const Bureaucrat& other) : _name(other._name), _grade(other._grade) {
-	std::cout << "Bureaucrat " << _name << " copied with grade " << _grade << std::endl;
 }
 
 Bureaucrat& Bureaucrat::operator=(const Bureaucrat& other) {
 	if (this != &other) {
 		_grade = other._grade;
-		std::cout << "Bureaucrat assignment: grade copied (" << _grade << ")" << std::endl;
 	}
 	return *this;
 }
 
 Bureaucrat::~Bureaucrat(void) {
-	std::cout << "Bureaucrat " << _name << " destroyed" << std::endl;
 }
 
 const std::string& Bureaucrat::getName(void) const {
@@ -45,7 +40,6 @@ void Bureaucrat::incrementGrade(void) {
 		throw GradeTooHighException();
 	}
 	_grade--;
-	std::cout << "Bureaucrat " << _name << " grade incremented to " << _grade << std::endl;
 }
 
 void Bureaucrat::decrementGrade(void) {
@@ -53,7 +47,6 @@ void Bureaucrat::decrementGrade(void) {
 		throw GradeTooLowException();
 	}
 	_grade++;
-	std::cout << "Bureaucrat " << _name << " grade decremented to " << _grade << std::endl;
 }
 
 void Bureaucrat::signForm(Form& form) {
@@ -75,6 +68,6 @@ const char* Bureaucrat::GradeTooLowException::what() const throw() {
 }
 
 std::ostream& operator<<(std::ostream& out, const Bureaucrat& bureaucrat) {
-	out << bureaucrat.getName() << ", bureaucrat grade " << bureaucrat.getGrade();
+	out << bureaucrat.getName() << ", bureaucrat grade " << bureaucrat.getGrade() << ".";
 	return out;
 }

@@ -1,13 +1,19 @@
 #include "BitcoinExchange.hpp"
 
-// Constructors
+#include <cctype>
+#include <cstdlib>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <sstream>
+
 BitcoinExchange::BitcoinExchange(void) {
 }
 
 BitcoinExchange::BitcoinExchange(const BitcoinExchange& other) : _exchangeRates(other._exchangeRates) {
 }
 
-// Assignment operator
 BitcoinExchange& BitcoinExchange::operator=(const BitcoinExchange& other) {
 	if (this != &other) {
 		_exchangeRates = other._exchangeRates;
@@ -15,17 +21,45 @@ BitcoinExchange& BitcoinExchange::operator=(const BitcoinExchange& other) {
 	return *this;
 }
 
-// Destructor
 BitcoinExchange::~BitcoinExchange(void) {
 }
 
-// Helper functions
+BitcoinExchange::FileException::FileException(const std::string& message) : _message(message) {
+}
+
+BitcoinExchange::FileException::~FileException() throw() {
+}
+
+const char* BitcoinExchange::FileException::what() const throw() {
+	return _message.c_str();
+}
+
+BitcoinExchange::InvalidFormatException::InvalidFormatException(const std::string& message) : _message(message) {
+}
+
+BitcoinExchange::InvalidFormatException::~InvalidFormatException() throw() {
+}
+
+const char* BitcoinExchange::InvalidFormatException::what() const throw() {
+	return _message.c_str();
+}
+
+BitcoinExchange::InvalidValueException::InvalidValueException(const std::string& message) : _message(message) {
+}
+
+BitcoinExchange::InvalidValueException::~InvalidValueException() throw() {
+}
+
+const char* BitcoinExchange::InvalidValueException::what() const throw() {
+	return _message.c_str();
+}
+
 std::string BitcoinExchange::trim(const std::string& str) const {
-	size_t first = str.find_first_not_of(' ');
+	size_t first = str.find_first_not_of(" \t\r\n");
 	if (first == std::string::npos) {
 		return "";
 	}
-	size_t last = str.find_last_not_of(' ');
+	size_t last = str.find_last_not_of(" \t\r\n");
 	return str.substr(first, (last - first + 1));
 }
 
@@ -33,7 +67,9 @@ double BitcoinExchange::stringToDouble(const std::string& str) const {
 	std::istringstream iss(str);
 	double value;
 	iss >> value;
-	if (iss.fail() || !iss.eof()) {
+	if (iss.fail() || !iss.eof() || value != value ||
+		value == std::numeric_limits<double>::infinity() ||
+		value == -std::numeric_limits<double>::infinity()) {
 		throw InvalidFormatException("Invalid number format");
 	}
 	return value;
@@ -51,10 +87,9 @@ bool BitcoinExchange::validateDateFormat(const std::string& date) const {
 		return false;
 	}
 	
-	// Check if year, month, day are digits
 	for (int i = 0; i < 10; i++) {
 		if (i == 4 || i == 7) continue;
-		if (!std::isdigit(date[i])) {
+		if (!std::isdigit(static_cast<unsigned char>(date[i]))) {
 			return false;
 		}
 	}
@@ -70,7 +105,7 @@ bool BitcoinExchange::isValidDate(const std::string& date) const {
 	int month = std::atoi(date.substr(5, 2).c_str());
 	int day = std::atoi(date.substr(8, 2).c_str());
 	
-	if (year < 1900 || year > 2100) {
+	if (year < 1) {
 		return false;
 	}
 	if (month < 1 || month > 12) {
@@ -89,11 +124,6 @@ bool BitcoinExchange::isValidDate(const std::string& date) const {
 	return true;
 }
 
-bool BitcoinExchange::isValidValue(double value) const {
-	return value >= 0 && value <= 1000;
-}
-
-// Main functionality
 void BitcoinExchange::loadDatabase(const std::string& filename) {
 	std::ifstream file(filename.c_str());
 	if (!file.is_open()) {
@@ -104,10 +134,12 @@ void BitcoinExchange::loadDatabase(const std::string& filename) {
 	bool firstLine = true;
 	
 	while (std::getline(file, line)) {
+		if (!line.empty() && line[line.size() - 1] == '\r')
+			line.erase(line.size() - 1);
 		if (firstLine) {
 			firstLine = false;
 			if (line == "date,exchange_rate") {
-				continue;  // Skip header
+				continue;
 			}
 		}
 		
@@ -142,20 +174,18 @@ void BitcoinExchange::loadDatabase(const std::string& filename) {
 }
 
 double BitcoinExchange::getExchangeRate(const std::string& date) const {
-	// Find the exact date or the closest previous date
 	std::map<std::string, double>::const_iterator it = _exchangeRates.find(date);
 	
 	if (it != _exchangeRates.end()) {
 		return it->second;
 	}
 	
-	// Find the closest date before the given date
 	it = _exchangeRates.lower_bound(date);
 	if (it == _exchangeRates.begin()) {
 		throw InvalidValueException("No exchange rate available for date: " + date);
 	}
 	
-	--it;  // Get the previous date
+	--it;
 	return it->second;
 }
 
@@ -169,10 +199,12 @@ void BitcoinExchange::processInput(const std::string& filename) {
 	bool firstLine = true;
 	
 	while (std::getline(file, line)) {
+		if (!line.empty() && line[line.size() - 1] == '\r')
+			line.erase(line.size() - 1);
 		if (firstLine) {
 			firstLine = false;
 			if (line == "date | value") {
-				continue;  // Skip header
+				continue;
 			}
 		}
 		
@@ -189,13 +221,11 @@ void BitcoinExchange::processInput(const std::string& filename) {
 		std::string date = trim(line.substr(0, pipePos));
 		std::string valueStr = trim(line.substr(pipePos + 3));
 		
-		// Validate date
 		if (!isValidDate(date)) {
 			std::cout << "Error: bad input => " << date << std::endl;
 			continue;
 		}
 		
-		// Validate and parse value
 		double value;
 		try {
 			value = stringToDouble(valueStr);
@@ -204,7 +234,6 @@ void BitcoinExchange::processInput(const std::string& filename) {
 			continue;
 		}
 		
-		// Check value range
 		if (value < 0) {
 			std::cout << "Error: not a positive number." << std::endl;
 			continue;
@@ -214,20 +243,11 @@ void BitcoinExchange::processInput(const std::string& filename) {
 			continue;
 		}
 		
-		// Get exchange rate and calculate result
 		try {
 			double rate = getExchangeRate(date);
 			double result = value * rate;
-			// Remove trailing zeros and unnecessary decimal points
-			std::ostringstream oss;
-			oss << std::fixed << std::setprecision(10) << result;
-			std::string resultStr = oss.str();
-			// Remove trailing zeros
-			resultStr.erase(resultStr.find_last_not_of('0') + 1, std::string::npos);
-			if (resultStr[resultStr.length() - 1] == '.') {
-				resultStr.erase(resultStr.length() - 1);
-			}
-			std::cout << date << " => " << value << " = " << resultStr << std::endl;
+			std::cout << std::setprecision(std::numeric_limits<double>::digits10)
+				<< date << " => " << value << " = " << result << std::endl;
 		} catch (const InvalidValueException& e) {
 			std::cout << "Error: " << e.what() << std::endl;
 		}
@@ -235,8 +255,3 @@ void BitcoinExchange::processInput(const std::string& filename) {
 	
 	file.close();
 }
-
-
-
-
-

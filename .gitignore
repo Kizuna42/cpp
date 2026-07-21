@@ -12,7 +12,28 @@ megaphone
 phonebook
 account
 test
-tests
+bureaucrat
+form
+aform
+intern
+convert
+serializer
+identify
+whatever
+iter
+array_test
+easyfind
+span
+mutantstack
+btc
+RPN
+PmergeMe
+
+# Exercise-generated output
+*_shrubbery
+
+# Per-exercise object directories
+obj/
 
 # macOS
 .DS_Store
@@ -48,6 +69,7 @@ $RECYCLE.BIN/
 *.tmp
 *.temp
 *.log
+.local-audit/
 
 # Core dumps and debugging
 core
@@ -69,6 +91,3 @@ cppcheck-results.xml
 *.bak
 *.backup
 *~
-
-# Project specific
-# (Add any project-specific files to ignore)

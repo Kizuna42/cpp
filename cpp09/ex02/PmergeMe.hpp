@@ -1,79 +1,51 @@
 #ifndef PMERGEME_HPP
 #define PMERGEME_HPP
 
-#include <iostream>
+#include <deque>
+#include <exception>
 #include <string>
 #include <vector>
-#include <deque>
-#include <algorithm>
-#include <ctime>
-#include <sstream>
-#include <iomanip>
-#include <exception>
 
 class PmergeMe {
 private:
+	std::vector<std::string> _tokens;
 	std::vector<int> _vectorData;
 	std::deque<int> _dequeData;
-	
-	// Timing variables
-	clock_t _vectorTime;
-	clock_t _dequeTime;
-	
-	// Private helper functions for vector
-	void mergeInsertSortVector(std::vector<int>& arr, int left, int right);
-	void insertionSortVector(std::vector<int>& arr, int left, int right);
-	void mergeVector(std::vector<int>& arr, int left, int mid, int right);
-	
-	// Private helper functions for deque
-	void mergeInsertSortDeque(std::deque<int>& arr, int left, int right);
-	void insertionSortDeque(std::deque<int>& arr, int left, int right);
-	void mergeDeque(std::deque<int>& arr, int left, int mid, int right);
-	
-	// Utility functions
+	double _vectorTimeUs;
+	double _dequeTimeUs;
+
+	void fordJohnsonVector(const std::vector<int>& values,
+		std::vector<size_t>& order);
+	size_t upperBoundVector(const std::vector<int>& values,
+		const std::vector<size_t>& chain, size_t end, int value) const;
+	std::vector<size_t> jacobsthalOrderVector(size_t pendCount) const;
+
+	void fordJohnsonDeque(const std::deque<int>& values,
+		std::deque<size_t>& order);
+	size_t upperBoundDeque(const std::deque<int>& values,
+		const std::deque<size_t>& chain, size_t end, int value) const;
+	std::deque<size_t> jacobsthalOrderDeque(size_t pendCount) const;
+
 	bool isValidNumber(const std::string& str) const;
 	int stringToInt(const std::string& str) const;
-	double clockToMilliseconds(clock_t clocks) const;
 
 public:
-	// Orthodox Canonical Form
 	PmergeMe(void);
 	PmergeMe(const PmergeMe& other);
 	PmergeMe& operator=(const PmergeMe& other);
 	~PmergeMe(void);
-	
-	// Main functionality
+
 	void parseInput(int argc, char** argv);
 	void sortVector(void);
 	void sortDeque(void);
-	void displayResults(void) const;
+	void displayBefore(void) const;
+	void displayAfter(void) const;
 	void displayTiming(void) const;
-	
-	// Utility functions
-	size_t getSize(void) const;
-	bool isEmpty(void) const;
-	bool isSorted(void) const;
-	const std::vector<int>& getVectorData(void) const;
-	const std::deque<int>& getDequeData(void) const;
-	
-	// Exception classes
+
 	class InvalidInputException : public std::exception {
-	private:
-		std::string _message;
 	public:
-		InvalidInputException(const std::string& message) : _message(message) {}
-		virtual ~InvalidInputException() throw() {}
-		virtual const char* what() const throw() { return _message.c_str(); }
-	};
-	
-	class EmptyContainerException : public std::exception {
-	public:
-		virtual const char* what() const throw() { return "Container is empty"; }
+		virtual const char* what() const throw();
 	};
 };
 
 #endif
-
-
-
-

@@ -1,250 +1,96 @@
 # 42 School C++ Modules 00-09
 
-## 概要
+C++98でC++の基礎からSTLまでを学ぶ42 Schoolの演習リポジトリです。実ディレクトリ数は全10 Module・38 Exerciseです。
 
-42 スクールの C++カリキュラムプロジェクトです。C++98 標準に準拠し、オブジェクト指向プログラミングの基礎から応用まで段階的に学習します。
+## 現在の検証範囲
 
-**🎯 プロジェクト完了**: 全30演習が42スクール基準を満たしてプロフェッショナル品質で実装完了
+2026-07-21にCPP05〜CPP09の全16 Exerciseを、ローカルの公式subject PDFと照合して再監査しました(2026-07-20監査の再実証+検証強化)。
 
-## プロジェクト構成
+- CPP05: 4 Exercise
+- CPP06: 3 Exercise
+- CPP07: 3 Exercise
+- CPP08: 3 Exercise
+- CPP09: 3 Exercise
 
-```
-cpp/
-├── cpp00/          # Module 00: 名前空間、クラス、メンバ関数 ✅
-│   ├── ex00/       # Megaphone - 文字列変換
-│   ├── ex01/       # PhoneBook - クラス設計・静的配列
-│   └── ex02/       # Account - 静的メンバ管理
-├── cpp01/          # Module 01: メモリ割り当て、ポインタ、参照 ✅
-│   ├── ex00/       # BraiiiiiiinnnzzzZ - Zombie クラス（スタック/ヒープ）
-│   ├── ex01/       # Moar brainz! - ZombieHorde 配列動的確保
-│   ├── ex02/       # HI THIS IS BRAIN - ポインタと参照の比較
-│   ├── ex03/       # Unnecessary violence - Weapon クラス設計
-│   ├── ex04/       # Sed is for losers - ファイル文字列置換
-│   ├── ex05/       # Harl 2.0 - メンバ関数ポインタ
-│   └── ex06/       # Harl filter - switch 文実装
-├── cpp02/          # Module 02: 多態性、演算子オーバーロード ✅
-│   ├── ex00/       # My First Class in Orthodox Canonical Form
-│   ├── ex01/       # Towards a more useful fixed-point number class
-│   ├── ex02/       # Now we're talking - 完全な演算子オーバーロード
-│   └── ex03/       # BSP - Binary Space Partitioning アルゴリズム
-├── cpp03/          # Module 03: 継承 ✅
-│   ├── ex00/       # Aaaaand... OPEN! - ClapTrap 基底クラス
-│   ├── ex01/       # Serena, my love! - ScavTrap 継承
-│   ├── ex02/       # Repetitive work - FragTrap 継承
-│   └── ex03/       # Now it's weird! - DiamondTrap 多重継承
-├── cpp04/          # Module 04: サブタイプ多態性、抽象クラス ✅
-│   ├── ex00/       # Polymorphism - Animal 階層・仮想関数
-│   ├── ex01/       # I don't want to set the world on fire - Brain クラス
-│   ├── ex02/       # Abstract class - 純粋仮想関数
-│   └── ex03/       # Interface & recap - Materia システム
-├── cpp05/          # Module 05: 例外処理 ✅
-│   ├── ex00/       # Mommy, when I grow up, I want to be a bureaucrat!
-│   ├── ex01/       # Form up, maggots!
-│   ├── ex02/       # No, you need form 28B, not 28C...
-│   └── ex03/       # At least this beats coffee-making
-├── cpp06/          # Module 06: C++キャスト ✅
-│   ├── ex00/       # ScalarConverter - 型変換
-│   ├── ex01/       # Serializer - シリアライゼーション
-│   └── ex02/       # Identify - 型識別
-├── cpp07/          # Module 07: テンプレート ✅
-│   ├── ex00/       # Start with a few functions - swap/min/max
-│   ├── ex01/       # Iter - テンプレート反復関数
-│   └── ex02/       # Array - テンプレート配列クラス
-├── cpp08/          # Module 08: STLコンテナ ✅
-│   ├── ex00/       # Easy find - STLコンテナ検索
-│   ├── ex01/       # Span - 数値範囲管理
-│   └── ex02/       # MutantStack - スタックイテレータ
-└── cpp09/          # Module 09: STLアルゴリズム ✅
-    ├── ex00/       # Bitcoin Exchange - CSV処理・マップ活用
-    ├── ex01/       # Reverse Polish Notation - スタック計算機
-    └── ex02/       # PmergeMe - Ford-Johnsonマージインサートソート
-```
+この監査では、macOS/Apple clang 21とDocker Ubuntu 24.04 aarch64/g++ 13.3の両方でC++98ビルド・動作・境界値を確認し、UbuntuではValgrind 3.22.0も実行しています。検証スクリプトにはsubject実行例との完全一致照合と禁止パターン静的検査を追加済みです。CPP00〜CPP04は今回の監査対象外です。古い評価結果を現在の検証結果として扱わないでください。
 
-## 開発環境
+詳細は次の資料を参照してください。
 
-### 必要ツール
+- [CPP05-09 defense notes](REVIEW_NOTES.md)
+- [CPP05-09 comprehensive evaluation](COMPREHENSIVE_EVALUATION.md)
+- [Reproducible verification script](scripts/verify_cpp05_09.sh)
 
-- **コンパイラ**: c++ (C++98 サポート)
-- **make**: GNU Make
-- **Git**: バージョン管理
+## Exercise構成
 
-### 開発環境
+| Module | Exercise数 | 主題 |
+|---|---:|---|
+| CPP00 | 3 | namespaces, classes, member functions |
+| CPP01 | 7 | memory allocation, references, file I/O |
+| CPP02 | 4 | OCF, operator overloading, fixed point |
+| CPP03 | 4 | inheritance |
+| CPP04 | 4 | subtype polymorphism, abstract classes |
+| CPP05 | 4 | exceptions, forms, factory |
+| CPP06 | 3 | C++ casts |
+| CPP07 | 3 | function/class templates |
+| CPP08 | 3 | templated containers, iterators, algorithms |
+| CPP09 | 3 | STL applications, Ford–Johnson |
+| 合計 | 38 | |
 
-- **macOS**: 主要開発環境
-- **Ubuntu**: valgrind によるメモリテスト環境
+## 個別Exerciseのビルド
 
-## ビルド方法
-
-各モジュールの演習ディレクトリで：
+各`exXX`ディレクトリで実行します。
 
 ```bash
-# ビルド
 make
-
-# テスト実行
-make test
-
-# クリーンビルド
 make re
-
-# クリーンアップ
 make fclean
 ```
 
-## コンパイル仕様
+すべてのMakefileは次の必須フラグを使用します。
 
-- **標準**: C++98
-- **フラグ**: `-Wall -Wextra -Werror -std=c++98`
-- **警告**: ゼロ警告必須
+```text
+c++ -Wall -Wextra -Werror -std=c++98
+```
 
-## 開発制約
+実行ファイル名は各Makefileの`NAME`を確認してください。`make test`ターゲットはありません。
 
-### 禁止項目
+## CPP05-09の一括検証
 
-- C++11 以降の機能
-- STL コンテナ（Module 08 まで）
-- `using namespace`文
-- `printf()`, `malloc()`, `free()`
-- `friend`キーワード
+macOSまたは、g++/make/Valgrindが導入済みのLinuxでは次を実行します。
 
-### 必須項目
+```bash
+./scripts/verify_cpp05_09.sh
+```
 
-- Orthodox Canonical Form（Module 02 から）
-- メモリリーク防止
-- RAII 原則
-- インクルードガード
+スクリプトは通常ビルド、再リンク判定、26ヘッダーのstandalone compile、subject例(実行例ブロックの完全一致照合を含む)、境界値、公開API制約、禁止パターン静的検査、`-pedantic-errors`、PmergeMe 3000件・500 property casesを実行します。Valgrindがあれば16 binaryとArrayの例外経路も検証し、終了時に生成物を`fclean`します。
 
-## 実装内容・学習成果
+DockerがあるホストではUbuntu 24.04コンテナで完全再現できます(リポジトリはread-onlyマウントで汚しません)。
 
-### Module 00: C++基礎 ✅
+```bash
+docker run --rm -v /path/to/cpp:/src:ro ubuntu:24.04 bash -c \
+  'apt-get update && apt-get install -y g++ make valgrind && \
+   cp -a /src /work && cd /work && ./scripts/verify_cpp05_09.sh'
+```
 
-**学習項目**: 名前空間、クラス設計、メンバ関数、stdio streams
-- **ex00 Megaphone**: 大文字変換、引数処理
-- **ex01 PhoneBook**: クラス設計、静的配列、インデックス管理
-- **ex02 Account**: 静的メンバ変数・関数、ログ出力
+2026-07-21の実測ではこの手順(g++/make/valgrind導入済みイメージ)で実行しました。2026-07-20はUTMのUbuntu 24.04 guest内`/tmp`で同スクリプトを実行しています。
 
-### Module 01: メモリ管理・ポインタ ✅
+## 共通制約
 
-**学習項目**: 動的メモリ割り当て、ポインタ vs 参照、メンバ関数ポインタ
-- **ex00 Zombie**: スタック vs ヒープメモリ、new/delete
-- **ex01 ZombieHorde**: 配列動的確保、適切な解放順序
-- **ex02 HI THIS IS BRAIN**: ポインタと参照のアドレス比較
-- **ex03 Weapon**: 参照 vs ポインタ設計の使い分け
-- **ex04 Sed替換**: ファイルI/O、文字列操作、エラーハンドリング
-- **ex05 Harl**: メンバ関数ポインタ配列
-- **ex06 HarlFilter**: switch文とフォールスルー
+- C++11以降の機能は禁止
+- `*printf()`、`*alloc()`、`free()`は禁止
+- `using namespace`と`friend`は禁止（subjectが明示的に許可する場合を除く）
+- STLコンテナ/アルゴリズムはCPP07まで禁止、CPP08/09で使用
+- Module 02以降はsubjectが除外した型を除きOrthodox Canonical Formを実装
+- ヘッダーガードとstandalone includeを維持
+- `new`を使う実装は例外経路を含めてリークさせない
 
-### Module 02: 演算子オーバーロード・OCF ✅
+## 最新監査結果
 
-**学習項目**: Orthodox Canonical Form、演算子オーバーロード、固定小数点演算
-- **ex00 Fixed OCF**: 4つの必須関数（デフォルトコンストラクタ、コピーコンストラクタ、代入演算子、デストラクタ）
-- **ex01 Fixed変換**: int/float変換コンストラクタ、型変換演算子
-- **ex02 Fixed演算**: 全算術・比較演算子、前置後置インクリメント、静的min/max
-- **ex03 BSP**: Binary Space Partitioning、点と三角形の内外判定アルゴリズム
+| 環境 | 結果 |
+|---|---|
+| macOS 26.5.2 arm64 / Apple clang 21 | 159 PASS / 0 FAIL / Valgrindのみ1 SKIP |
+| macOS ASan + UBSan | 16/16 binary PASS |
+| Docker Ubuntu 24.04 aarch64 / g++ 13.3.0 / Valgrind 3.22.0 | 176 PASS / 0 FAIL / 0 SKIP(Valgrind 17/17) |
+| Docker Ubuntu 24.04 amd64(qemu、build+機能のみ) | 159 PASS / 0 FAIL / Valgrindのみ1 SKIP |
 
-### Module 03: 継承・仮想関数 ✅
-
-**学習項目**: 継承階層、仮想関数、多重継承、ダイヤモンド問題
-- **ex00 ClapTrap**: 基底クラス設計、コンストラクタ・デストラクタチェーン
-- **ex01 ScavTrap**: 単一継承、仮想関数オーバーライド
-- **ex02 FragTrap**: 複数の派生クラス設計
-- **ex03 DiamondTrap**: 仮想継承によるダイヤモンド問題解決
-
-### Module 04: ポリモーフィズム・抽象クラス ✅
-
-**学習項目**: 実行時ポリモーフィズム、純粋仮想関数、インターフェース設計
-- **ex00 Animal**: 仮想関数、ポリモーフィック動作、仮想デストラクタ
-- **ex01 Brain**: 深いコピー、リソース管理、コピーコンストラクタの重要性
-- **ex02 Abstract**: 純粋仮想関数、抽象基底クラス、インスタンス化不可
-- **ex03 Materia**: 複雑なインターフェース設計、メモリ管理システム
-
-### Module 05: 例外処理 ✅
-
-**学習項目**: 例外クラス設計、try-catch、例外安全性
-- **ex00 Bureaucrat**: カスタム例外クラス、等級管理システム
-- **ex01 Form**: フォーム署名システム、例外によるエラーハンドリング
-- **ex02 AForm**: 抽象フォームクラス、具体的なフォーム実装
-- **ex03 Intern**: ファクトリーパターン、メンバ関数ポインタ配列
-
-### Module 06: C++キャスト ✅
-
-**学習項目**: static_cast、dynamic_cast、reinterpret_cast、const_cast
-- **ex00 ScalarConverter**: 型変換、特殊値（nan、inf）処理
-- **ex01 Serializer**: ポインタシリアライゼーション、reinterpret_cast
-- **ex02 Identify**: dynamic_castによる実行時型識別
-
-### Module 07: テンプレート ✅
-
-**学習項目**: 関数テンプレート、クラステンプレート、テンプレート特殊化
-- **ex00 swap/min/max**: 関数テンプレート、等価時の返却規則
-- **ex01 iter**: テンプレート反復関数、const/非const対応
-- **ex02 Array**: クラステンプレート、動的配列管理
-
-### Module 08: STLコンテナ ✅
-
-**学習項目**: vector、deque、stack、map、set、イテレータ
-- **ex00 easyfind**: STLコンテナ検索、テンプレート関数
-- **ex01 Span**: 数値範囲管理、最大最小スパン計算
-- **ex02 MutantStack**: スタックイテレータ実装
-
-### Module 09: STLアルゴリズム ✅
-
-**学習項目**: STLアルゴリズム、コンテナ活用、パフォーマンス測定
-- **ex00 Bitcoin Exchange**: CSV処理、std::map活用、日付検索
-- **ex01 RPN**: 逆ポーランド記法、std::stack計算機
-- **ex02 PmergeMe**: Ford-Johnsonアルゴリズム、vector/deque比較
-
-## 技術的品質保証 🎯
-
-### コンパイル・基準適合性
-- ✅ **コンパイル警告ゼロ**: 全演習で `-Wall -Wextra -Werror -std=c++98` クリア
-- ✅ **C++98標準準拠**: 禁止機能（C++11+、STL、using namespace）の完全回避
-- ✅ **Orthodox Canonical Form**: Module 02以降の全クラスで適切実装
-
-### メモリ管理・安全性
-- ✅ **メモリリークゼロ**: AddressSanitizer検証済み
-- ✅ **RAII原則遵守**: リソース取得・解放の自動化
-- ✅ **深いコピー実装**: 浅いコピー問題の完全回避
-
-### アーキテクチャ・設計品質
-- ✅ **仮想デストラクタ**: ポリモーフィック基底クラス全てで実装
-- ✅ **インターフェース設計**: 純粋仮想関数による抽象化
-- ✅ **例外安全性**: 基本的な例外安全保証
-
-### テスト・検証
-- ✅ **機能要件100%実装**: 全課題仕様完全実装
-- ✅ **エッジケーステスト**: 境界値・エラーケース包括対応
-- ✅ **クロスプラットフォーム**: macOS/Ubuntu双方で動作確認
-
-## 高度な実装技術
-
-### 特筆すべき技術実装
-- **仮想継承**: DiamondTrapでのダイヤモンド問題解決
-- **メンバ関数ポインタ**: Harlクラス、Internクラスでの配列活用
-- **BSPアルゴリズム**: 固定小数点演算による幾何計算
-- **グラウンドシステム**: Materiaでの高度なメモリ管理
-- **テンプレートメタプログラミング**: 型安全な汎用実装
-- **STLアルゴリズム**: 効率的なコンテナ操作
-
-### プロフェッショナル品質指標
-- **コード可読性**: 一貫したコーディングスタイル
-- **エラーハンドリング**: 堅牢な境界チェック・例外処理
-- **設計パターン**: RAII、Factory、Strategy各パターン活用
-- **ドキュメント化**: 包括的なコメント・説明
-
-## 42スクール評価基準適合
-
-### 評価項目別達成状況
-- **Compiling (コンパイル)**: ✅ 満点 - 警告ゼロ、適切なMakefile
-- **Memory Management (メモリ管理)**: ✅ 満点 - リーク検出、適切な解放
-- **Implementation (実装)**: ✅ 満点 - 全機能要件満足
-- **Code Quality (コード品質)**: ✅ 満点 - C++98準拠、適切な設計
-
-**総合評価**: **満点取得可能レベル** - 即座提出準備完了
-
----
-
-**Status**: ✅ **完成** - 42スクール提出準備完了  
-**Implementation**: 30/30 演習完了 (100%)  
-**Quality Assurance**: プロフェッショナル品質達成  
-**Last Updated**: 2025-01-XX
+監査日: 2026-07-21(前回2026-07-20のUTM Ubuntu実測 155/0/0 は検証ケース追加前の値)

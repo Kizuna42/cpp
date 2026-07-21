@@ -8,14 +8,15 @@ OBJDIR = obj
 
 SOURCES = main.cpp Bureaucrat.cpp AForm.cpp ShrubberyCreationForm.cpp RobotomyRequestForm.cpp PresidentialPardonForm.cpp Intern.cpp
 OBJECTS = $(SOURCES:%.cpp=$(OBJDIR)/%.o)
+HEADERS = $(wildcard *.hpp)
 
 all: $(NAME)
 
 $(NAME): $(OBJECTS)
-	@$(CXX) $(CXXFLAGS) $(OBJECTS) -o $(NAME)
+	$(CXX) $(CXXFLAGS) $(OBJECTS) -o $(NAME)
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR)
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(HEADERS) | $(OBJDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJDIR):
 	@mkdir -p $(OBJDIR)
@@ -29,11 +30,7 @@ fclean: clean
 
 re: fclean all
 
-test: $(NAME)
-	@echo "Running intern factory pattern tests..."
-	@./$(NAME)
-
-.PHONY: all clean fclean re test
+.PHONY: all clean fclean re
 
 
 
