@@ -1,277 +1,112 @@
 # CPP05-09 Defense Notes
 
-2026-07-21の最終監査に基づく校舎review用ノートです。実装・公式subject・検証結果が矛盾しないことを優先しています。
+2026-08-24版。42 EvalHubで確認した現行HTML criteriaを基準に、実装者がreviewで説明・実演するための防御ノートである。最終fresh verificationは完了し、確認範囲で提出可能・defense-readyと判定した。最新subject PDF CDNは404のため、基準の範囲は[包括評価レポート](COMPREHENSIVE_EVALUATION.md)のprovenanceを参照する。
 
-## 共通チェック
+## 共通review contract
 
-- 全16 Exercise: `c++ -Wall -Wextra -Werror -std=c++98`
-- 全Makefile: `all`, `clean`, `fclean`, `re`, `.PHONY`、header依存、不要な再リンクなし(検証スクリプトが16 Makefile全部の必須フラグ実在もgrep検査)
-- `-pedantic-errors`を追加したstrict buildも16/16成功
-- 26 headerすべてstandalone include compile成功
-- 禁止API（`*printf`, `*alloc`, `free`）、`using namespace`, `friend`なし(検証スクリプトの静的sweep `sources free of forbidden constructs` で機械検査)
-- `<typeinfo>` includeなし(静的sweep `no typeinfo include anywhere`)
-- subject記載の実行例ブロック(convert 0/nan/42.0f、whatever、RPN 3例、btc、PmergeMe 4行出力)と完全一致(`subject example`系ケース)
-- CPP05〜CPP07でSTL container/algorithmなし。CPP08/09ではsubjectに従って使用
-- OCFはsubjectが要求するclassに実装。CPP06 ex02のBase/A/B/Cなど、subjectが明示的に除外する型は例外
-
-### 再検証
-
-```bash
-./scripts/verify_cpp05_09.sh
-```
-
-Ubuntuでの完全再現(Docker、リポジトリはread-onlyで汚さない):
-
-```bash
-docker run --rm -v /path/to/cpp:/src:ro ubuntu:24.04 bash -c \
-  'apt-get update && apt-get install -y g++ make valgrind && \
-   cp -a /src /work && cd /work && ./scripts/verify_cpp05_09.sh'
-```
-
-VM等に直接導入済みの場合は一時copyで実行:
-
-```bash
-cp -a /path/to/cpp /tmp/cpp05-09-audit
-cd /tmp/cpp05-09-audit
-./scripts/verify_cpp05_09.sh
-```
-
-個別のbuildと実行:
-
-```bash
-(cd cpp05/ex00 && make re && ./bureaucrat)
-(cd cpp05/ex01 && make re && ./form)
-(cd cpp05/ex02 && make re && ./aform)
-(cd cpp05/ex03 && make re && ./intern)
-(cd cpp06/ex00 && make re && ./convert 42)
-(cd cpp06/ex01 && make re && ./serializer)
-(cd cpp06/ex02 && make re && ./identify)
-(cd cpp07/ex00 && make re && ./whatever)
-(cd cpp07/ex01 && make re && ./iter)
-(cd cpp07/ex02 && make re && ./array_test)
-(cd cpp08/ex00 && make re && ./easyfind)
-(cd cpp08/ex01 && make re && ./span)
-(cd cpp08/ex02 && make re && ./mutantstack)
-(cd cpp09/ex00 && make re && ./btc input.txt)
-(cd cpp09/ex01 && make re && ./RPN '8 9 * 9 - 9 - 9 - 4 - 1 +')
-(cd cpp09/ex02 && make re && ./PmergeMe 3 5 9 7 4 1)
-```
-
-Valgrindのoptionは一括scriptと同じく次を使う。
-
-```bash
-valgrind --error-exitcode=99 --leak-check=full \
-  --show-leak-kinds=all --errors-for-leak-kinds=all ./binary [args...]
-```
+- 各Exerciseは`c++ -Wall -Wextra -Werror -std=c++98`でbuildする。Makefileには`all`、`clean`、`fclean`、`re`を置く。
+- non-template実装をheaderに置かず、`printf`系、`alloc`系、`free`、`using namespace`、`friend`、外部libraryを使わない。
+- evaluatorがmainを差し替える前提で、公開API・const性・例外型・出力をsubjectどおりに説明する。自作mainが通るだけでは合格根拠にしない。
+- 質問に答えられない、ライブ変更後にbuildできない、例外・不正入力で未定義動作またはリークがある場合は、そのExerciseをstopする。
 
 ## CPP05 — Repetition and Exceptions
 
-| Ex | Binary | Defense要点 |
-|---|---|---|
-| ex00 | bureaucrat | grade 1が最高、150が最低。constructorとincrement/decrementの両方で境界を守る |
-| ex01 | form | name/required gradesはconst、全属性private、署名状態だけ変更可能 |
-| ex02 | aform | AFormが前提条件を一元検査し、派生classはactionだけ実装 |
-| ex03 | intern | form名とstatic creator function pointerの表をloop検索 |
+| Exercise | Review contract / design defense | Test coverage | 想定質問 | ライブコーディング案 | Stop rule |
+|---|---|---|---|---|---|
+| ex00 `bureaucrat` | `Bureaucrat`のgradeは常に1〜150。constructor・increment・decrementが同じ不変条件を守り、挿入演算子は状態を読むだけ。 | grade 1/150、両方向の境界例外、名前・grade出力。 | 「境界検査をsetterだけに置かない理由は？」→無効状態を生成できないため。 | grade 1でincrement、150でdecrementする小mainを追加。 | 範囲外stateが残る、例外型/出力が不正。 |
+| ex01 `form` | `Form`のnameと署名必要grade/実行必要gradeは`const`かつprivate。`beSigned`は署名者gradeを検査し、状態だけを更新する。 | valid/invalid constructor、署名成功・不足・再署名、`<<`。 | 「なぜrequired gradeを変更できないか？」→formの契約値だから。 | grade不足の`beSigned`をcatchして表示。 | 属性の可視性/const性不適合、署名条件の迂回。 |
+| ex02 `aform` | `AForm::execute`がunsigned・executor gradeを一元検査するTemplate Method。Shrubbery/Robotomy/Presidentialはactionのみを実装する。 | 各formのsign/execute不足・成功、Shrubbery file、Robotomy失敗分岐、Pardon出力。 | 「なぜactionを直接publicにしないか？」→共通前提を迂回させないため。 | unsigned formへ`executeForm`、署名後に低gradeで実行。 | actionが検査を迂回、成功と失敗を同時表示、必要な具象form不足。 |
+| ex03 `intern` | `Intern::makeForm`はform名とstatic creator function pointerのtableをloop検索してdispatchする。if/else-if chainは使わない。未知名は明示エラーを一度表示して`UnknownFormException`を投げる。 | 3既知名が対応型を生成、未知名、戻りpointerのdelete、生成通知。 | 「tableがif chainより良い理由は？」→name/creator対応をdata化し追加時に分岐を増やさず、同じ呼出し型でdispatchできるため。 | tableに一行追加できる形を示し、未知名を入力して単発エラーと例外経路を確認。 | if/else-if dispatch、未知名を既知formへすり替え、エラーの二重表示、所有権不明。 |
 
-- `beSigned()`: grade不足なら`GradeTooLowException`。十分なら`_isSigned = true`。既署名でも成功状態を維持する
-- `execute()`: unsignedなら`FormNotSignedException`、grade不足なら`GradeTooLowException`、その後`executeAction()`
-- `executeAction()`はAFormでprotected、concrete classでprivate。外部から前提条件を迂回できない
-- 成功表示はactionがreturnした後の`Bureaucrat::executeForm()`だけ。file生成失敗時に成功と失敗を同時表示しない
-- grade: Shrubbery 145/137、Robotomy 72/45、Presidential 25/5
-- `executeForm(AForm const& form) const`の末尾`const`もsubjectどおり
+### CPP05 口頭防御の要点
 
-想定Q: なぜtemplate method方式か。  
-AFormが共通の署名/grade検査を一度だけ実装し、派生classの責務をactionに限定できるため。
-
-想定Q: なぜconstructor/destructorで出力しないか。  
-subjectが要求する結果出力とaction出力だけを安定させ、OCFの内部イベントを公開動作へ混ぜないため。
-
-想定Q: ex02のmainはなぜ全体をtry/catchで囲まないか。  
-mainが直接構築するBureaucrat/Formはすべて有効grade値で、constructorがthrowする経路が構造的に存在しないため。例外経路は`signForm`/`executeForm`内部のcatchが仕様どおりのメッセージへ変換し、境界例外のcatch実演はex00/ex01のmainで行っている。
+- `beSigned()`はgrade不足時に`GradeTooLowException`、十分ならsigned状態へ遷移する。`execute()`はsigned確認、executor grade確認、actionの順である。
+- gradeはShrubberyがsign 145 / execute 137、Robotomyが72 / 45、Presidentialが25 / 5である。小さいほど高いgradeである。
+- `Bureaucrat::signForm`と`executeForm`は操作の窓口であり、例外を捕捉して結果を表示する。action完了前に成功を表示しない。
+- Internの返却raw pointerはcallerが所有する。失敗時の扱いと、成功後に`delete`する場所をライブで指せるようにする。
 
 ## CPP06 — C++ Casts
 
-| Ex | Binary | Cast |
-|---|---|---|
-| ex00 | convert | `static_cast` |
-| ex01 | serializer | `reinterpret_cast` |
-| ex02 | identify | `dynamic_cast` |
+| Exercise | Review contract / design defense | Test coverage | 想定質問 | ライブコーディング案 | Stop rule |
+|---|---|---|---|---|---|
+| ex00 `convert` | `ScalarConverter`はprivate constructor、公開static `convert`。scalar literalを判定し、表示ごとに表現可能性を判断して`static_cast`する。 | char/int/float/double、pseudo literal、NaN/Inf、非表示char、範囲外、末尾`f`。 | 「なぜC castでないか？」→変換意図を明示し、scalar conversionに`static_cast`を選ぶため。 | `42.0f`、`nan`、範囲外値を追加して4表示を説明。 | private/static要件違反、literal誤分類、範囲外castを実行。 |
+| ex01 `serializer` | `Serializer`はprivate constructorと2 static functionのみ。pointerと`uintptr_t`を`reinterpret_cast`で往復し、object値ではなくaddress identityを確認する。 | `Data`を生成、serialize/deserialize後のpointer equality、値アクセス。 | 「static_castでない理由は？」→無関係なpointer/integer表現の再解釈だから。 | round-tripして`ptr == restored`を出力。 | cast種別違い、pointer identity未確認、所有権を誤ってdelete。 |
+| ex02 `identify` | `Base`からA/B/Cを生成し、pointer版はNULL判定、reference版は`dynamic_cast<T&>`と`try/catch`で識別する。`typeinfo`は使わない。 | generate、各A/B/Cのpointer/reference識別、出力が単独の型名。 | 「pointerとreferenceの失敗の違いは？」→NULLと`std::bad_cast`。 | reference版にA/B/C順のcast/catchを実装し、pointerを使わないことを示す。 | `typeid`/`<typeinfo>`使用、reference版でpointer cast、型名以外の出力。 |
 
-### ScalarConverter
+### CPP06 口頭防御の要点
 
-- 判定順はpseudo-literal → char → int → float → double
-- floatは末尾`f`を除いてparseし、`FLT_MAX`超をfloatへcastしない
-- NaNは`v != v`、Infは`numeric_limits<>::infinity()`でC++98判定
-- `strtod`のERANGEでも非0のsubnormalは有効。Infまたは0への完全underflowはparse失敗
-- char/int変換は先に0方向へ小数を切り捨てた値で範囲判定する
-- int範囲外のinteger literalも、各変換を個別判定する。例: `2147483648`はintだけ`impossible`でfloat/doubleは値を表示
-- finite doubleがfloat範囲外ならfloatだけ`impossible`
-- classの公開static methodは`convert()`だけ。判定・表示helperは`.cpp`のfile-local関数
-
-### Serializer / identify
-
-- `Data*` → `uintptr_t` → `Data*`のaddress identityを確認
-- C++98のため`<stdint.h>`を使用
-- pointer版`dynamic_cast<T*>`は失敗時NULL
-- reference版`dynamic_cast<T&>`は失敗時例外。関数内でpointerを使わない
-- `<typeinfo>`をincludeせず、reference cast失敗は各`catch (...)`で次の型判定へ進む
-- `identify()`自身はsubjectどおり単独の`A`, `B`, `C`を出力
+- `static_cast`は数値型間、`reinterpret_cast`はaddress表現、`dynamic_cast`はpolymorphic baseからの実行時型検査に選ぶ。各castの失敗時の意味まで説明する。
+- ScalarConverterは一つのparse結果を全型へ盲目的にcastしない。`int`、`char`、`float`、`double`ごとに範囲・表示可能性を決める。
+- reference `dynamic_cast`は失敗時に例外を投げるため、`catch (...)`で次の型を試せる。`<typeinfo>`は不要である。
 
 ## CPP07 — C++ Templates
 
-### ex00 whatever
+| Exercise | Review contract / design defense | Test coverage | 想定質問 | ライブコーディング案 | Stop rule |
+|---|---|---|---|---|---|
+| ex00 `whatever` | `swap`、`min`、`max`は任意型に対して必要最小限の演算だけを要求するtemplate。等値時の`min/max`は第2引数を返す。 | subject例、int/string、比較可能な自作型、等値時の参照identity。 | 「なぜ`const T&`を返すか？」→copyを避け、元の第2引数を参照として返すため。 | 同値の2変数のaddressを比較し第2引数を返すことを示す。 | 等値時に第1引数、template外の型依存実装。 |
+| ex01 `iter` | array pointer、length、関数を受け、各要素へ適用する。mutable/const arrayを適切なcallback型で受ける。 | int/string、自作型、const array、length 0、NULL guard。 | 「なぜfunction-pointer signatureか？」→第1引数から`T`を決めた後、未instantiated function template名を目標pointer型へ解決できるから。 | `print<T>`とconst callbackを渡すevaluator型呼出しを追加。 | template deduction不能、constを破るcallback、要素数外アクセス。 |
+| ex02 `array_test` | `Array<T>`は`new[]`で所有し、空/size constructor、`size`、`operator[]`、deep copyを提供する。template実装のheader配置は許容される。 | empty、sizedのdefault/value initialization、read/write、const read、bounds、simple/complex type、copy/assignment/self-assignment。 | 「代入の例外安全は？」→新しい配列のcopyが成功してから旧stateを置換し、失敗時は左辺を維持する。 | throwする要素型でcopy/assignmentを試し、catch後のsize/valueを確認。 | shallow copy、bounds例外なし、途中copyでリーク/左辺破壊、mainにcomplex/defaultの証拠なし。 |
 
-- `swap`, `min`, `max`は引数を参照で受ける
-- 等値時は第2引数を返すsubject要件を満たす
+### CPP07 口頭防御の要点
 
-### ex01 iter
-
-```cpp
-template<typename T>
-void iter(T* array, const size_t length, void (*function)(T&));
-
-template<typename T>
-void iter(const T* array, const size_t length, void (*function)(const T&));
-```
-
-第3引数を任意の`F`ではなくfunction pointerにする理由:
-
-- evaluator形式の`iter(tab, 5, print)`は、`print`が未instantiated function template名
-- 第1引数から`T`を先に決定し、目標function-pointer型によって`print<T>`を選択できる
-- `F`推論だけに任せると、未instantiated overload setから型を決められない
-- subjectはfunctionを要求しており、functor対応は必須でない
-
-NULL arrayまたはlength 0は何も実行しない。zero-length array extensionは使わず、1要素arrayをlength 0で試験する。
-
-### ex02 Array
-
-- template実装がheader内にあるのはinstantiation時にdefinitionが必要なため
-- `new T[n]()`でvalue-initialize
-- copy constructorは要素assignmentがthrowした場合にtemporary allocationを`delete[]`
-- assignmentはcopyを先に完成させてからswapするためstrong exception guarantee
-- deep copy、self-assignment、`size() const`、範囲外例外を確認
-- binary名`array_test`は、libc++内部の`<array>`と同名binary `array`のinclude衝突を避ける
-
-PDF掲載mainには`<cstdlib>`/`<ctime>`が不足するため、検証harnessでその2行だけ補完して実行している。
+- `iter`の`F`を任意callableにする拡張は必須ではない。評価用の`iter(tab, len, print)`を正しく推論できる関数pointer overloadを優先する。
+- `Array<T>(n)`は`new T[n]()`でvalue-initializeする。組込み型も未初期化にしない。
+- allocation後のelement assignmentがthrowし得るなら、copy constructorは確保済み配列を解放して再throwする。assignmentはcopy-first/swapでstrong guaranteeを保つ。
 
 ## CPP08 — Templated Containers
 
-### ex00 easyfind
-
-- `std::find`を使用
-- mutable/const containerの両overload
-- 未発見は`std::runtime_error`
-
-### ex01 Span
-
-- `shortestSpan()`: copyをsortし、隣接差の最小を取る。O(n log n)
-- `longestSpan()`: min/maxの差。O(n)
-- 戻り値と差分を`unsigned int`にし、`INT_MIN`〜`INT_MAX`の差`UINT_MAX`を表現
-- operandをunsigned化してから減算するためsigned overflowなし
-- `addRange`はrangeをtemporary vectorへ一度だけ読む。single-pass `istream_iterator`でも要素を失わない
-- 10,000件、同値、負値、満杯、要素不足を試験
-
-### ex02 MutantStack
-
-- `std::stack<T, Container>`のprotected member `c`へ派生classからアクセス
-- mutable/constのforward iteratorを公開
-- 継承済み`size()`/`empty()`を再定義せず、stackの全機能をそのまま利用
-- subject main相当の操作列、copy/assignment、空stack、vector backing containerを試験
+| Exercise | Review contract / design defense | Test coverage | 想定質問 | ライブコーディング案 | Stop rule |
+|---|---|---|---|---|---|
+| ex00 `easyfind` | `std::find`でintを持つcontainerからiteratorを返す。未発見は例外。 | vector/list、先頭/末尾、未発見、const container。 | 「手書きloopでなくalgorithmを使う理由は？」→criteriaがSTL algorithmを要求し、iterator抽象を保つため。 | listとvectorに同じtemplateを適用。 | `std::find`不使用、未発見を未定義iteratorとして返す。 |
+| ex01 `span` | 容量を超えない`addNumber`とrange add。shortestはsortしたcopyの隣接差、longestはmin/max。 | 2未満、満杯、同値、負値、10,000件、`INT_MIN/INT_MAX`、input iterator。 | 「range addがinput iteratorで安全な理由は？」→temporaryへ一度だけ読む。distance後の再走査はsingle-pass sourceを消費する。 | `istream_iterator<int>`を渡し、容量超過ならstate不変を確認。 | rangeを二重走査、capacity超過で部分挿入、signed overflow、2未満で計算。 |
+| ex02 `mutantstack` | `std::stack`のprotected `c`からiterator/const_iteratorを公開し、stack APIを保持する。 | subject sequence、begin/end、const iteration、copy/assignment、empty、別backing container。 | 「なぜ`c`へアクセスできるか？」→`std::stack`のprotected memberで派生classから合法的に参照できるため。 | `MutantStack<int, std::vector<int> >`のiteratorを通す。 | `c`を再実装、iteratorがstack順と不整合、subject main以下のtest。 |
 
 ## CPP09 — STL
 
 ### Containerの非再利用
 
-| Ex | Container | 理由 |
+| Exercise | Container | Defense |
 |---|---|---|
-| ex00 btc | `std::map<std::string, double>` | ordered date lookupと`lower_bound` |
-| ex01 RPN | `std::stack<int, std::list<int> >` | stack処理。backing containerをlistに固定 |
-| ex02 PmergeMe | `std::vector<int>`, `std::deque<int>` | subjectが異なる2 containersを要求 |
+| ex00 `btc` | `std::map<std::string, double>` | ordered keyと`lower_bound`による過去日の探索。 |
+| ex01 `RPN` | `std::stack<int, std::list<int> >` | LIFO評価を明示し、backing containerを過去Exerciseと分ける。 |
+| ex02 `PmergeMe` | `std::vector<int>`と`std::deque<int>` | subject要求の別々の2 containersで、両方をFord–Johnsonとして実装。 |
 
-map/list/vector/dequeは後続Exerciseで再利用していない。stackはcontainer adaptorで、backing containerも明示している。
+| Exercise | Review contract / design defense | Test coverage | 想定質問 | ライブコーディング案 | Stop rule |
+|---|---|---|---|---|---|
+| ex00 `btc` | CSVを`map`へ読み、入力dateのexact matchまたは過去側closest rateを使う。`lower_bound(date)`がbeginならrateなし、そうでなければ`--it`する。bad lineは表示して後続行を継続する。 | empty input、bad delimiter/date/value、leap year、DB先頭前/中間/末尾後、0/1000境界、`input.csv`。 | 「なぜ`lower_bound`後にdecrementか？」→戻りは最初の`>= date`なので、exact以外で直前が過去側最大keyだから。 | DB中間日と最終日より未来を実行してrateを確認。 | future側rateを選ぶ、beginをdecrement、bad lineで全処理停止、invalid date/値を通す。 |
+| ex01 `RPN` | tokenは1桁整数または演算子。pop順は最初がright、次がleft。演算前にoperand数、zero division、overflowを検査する。 | subject例、`42`、`42`、`15`、減算/除算順、余りtoken、decimal、zero division、加減乗除overflow。 | 「`-`のoperand順は？」→`right=pop(); left=pop(); left-right`。 | `5 2 -`と`5 2 /`、`INT_MIN / -1`拒否を実演。 | 逆順計算、stack final sizeが1でない、overflow後に演算、エラーで成功終了。 |
+| ex02 `PmergeMe` | vector/dequeそれぞれでFord–Johnsonを実装する。pairでwinner/partnerを作り、winnerを再帰sort、`b1`を先頭へ、残りをJacobsthal順にpartnerまでbinary insertしstragglerを処理する。 | 5〜10手動、重複、降順、3000 random、両containerのsorted/multiset一致、表示前後、timing。 | 「partner boundはなぜ正しい？」→pair比較で`b_j <= a_j`が既知であり、`a_j`右側は探索不要。 | 5〜10要素でpair/winner/pending/chainsを紙またはdebug出力で追い、Jacobsthal順を説明。 | 一方だけ別algorithm、partner右側を探索、Jacobsthalなし、3000 random未検証、時間を比較回数と混同。 |
 
-### ex00 BitcoinExchange
+### CPP09 口頭防御の要点
 
-- dateは固定幅`YYYY-MM-DD`なのでlexicographic orderとchronological orderが一致
-- exact dateがなければ`lower_bound`から1つ戻し、必ずpast側のclosest date
-- future dateにもDB末尾のrateを使用。first DB dateより前ならrateなし
-- Gregorian leap year、月の日数、year 0000拒否
-- valueは0〜1000、NaN/Inf拒否
-- resultは固定小数桁で丸めず、有効桁precisionを使うため極小の正数も保持
-- `data.csv`は`cpp09/ex00`をcurrent directoryにして読む
+- `btc`の`YYYY-MM-DD`は固定幅なら辞書順と暦順が一致する。日付妥当性はformatだけでなく閏年・月日数まで検査する。
+- current EvalHubの`input.csv`（header+21 data、22行）を実行し、exit 0・21 output linesを確認した。bad valueを報告した後も後続行を継続し、exact dateとclosest lower dateの両方を確認した。
+- RPNは`double`へ逃がさず整数stackでsubjectの整数演算を行う。先にpopするoperandがrightであることを、減算・除算で必ず実演する。
+- RPN advanced指定3式は順に`42`、`42`、`15`となることを最終実測した。
+- Ford–Johnsonのpartner boundは比較回数を抑える根拠、Jacobsthal順はbinary insertionの探索長を整える順序である。wall-clock timingは環境・container差を観測する指標で、比較回数の証明ではない。
+- timingはparseを含めるか、含めないなら両containerで同じ境界に揃える。microseconds表示の意味と、単発値を性能保証にしないことを説明する。
+- PmergeMeはn=5〜10の固定ケース、3000 descending、500 deterministic property、3000 random duplicatesについて、vector/deque双方のsorted+multisetを最終実測した。
 
-想定Q: 日付分解になぜ`std::atoi`を使うか。  
-subjectの禁止関数は`*printf`/`*alloc`/`free`のみでatoiは対象外。呼び出し前に`validateDateFormat`が固定長10文字・`-`位置・全桁数字を保証するため、atoiに渡るのは最大4桁の数字列に有界でオーバーフローも未定義動作もない。エラー検出が必要なvalue側は`stringToDouble`(istringstream)で失敗・NaN/Infを検査しており、要件の違いで使い分けている。
+### 比較回数の履歴証拠（2026-07-21、今回のfresh測定ではない）
 
-想定Q: 別のdirectoryから`./btc`を実行すると。  
-`loadDatabase("data.csv")`が`FileException`を投げ、mainが`Error: could not open file.`をstderrへ出して終了コード1で終わる。入力ファイル欠如時も同じメッセージ(検証スクリプトの`btc requires input file argument`/`btc missing input file`ケースで実挙動を確認済み)。
-
-### ex01 RPN
-
-- input tokenは1文字の`0`〜`9`だけ
-- operatorは`+ - * /`
-- 先にpopした値が右operand、次が左operand
-- stackは`int`なので`5 2 / 2 *`は`4`
-- decimal、token不足/余り、ゼロ除算はstderrに`Error`、nonzero exit
-- 加減乗はdouble空間でrangeを先に確認し、int overflowする演算を実行しない
-- `INT_MIN / -1`も明示的に拒否
-- 連続乗算で`INT_MAX`を超える回帰caseもnonzero exitを確認
-
-### ex02 PmergeMe
-
-Ford–Johnsonの流れ:
-
-1. 隣接要素をpair化し、1比較でwinner/loserへ分ける
-2. winner列を同じalgorithmで再帰sort
-3. 最小winnerのpartner `b1`を比較なしでmain chain先頭へ置く
-4. 残りのloserとstragglerをJacobsthal順でbinary insert
-5. vector版とdeque版を独立実装
-
-実装は値のcopyではなくindex順列をsortする。`partnerOf[winnerIndex]`でpairを保持するため重複値でもpartnerを取り違えない。
-`displayAfter()`はvector/dequeのsizeと全要素一致を先に検査するため、正常終了したproperty testは両実装を検証している。
-
-想定Q: なぜbinary-search上限をpartner位置にできるか。  
-`b_j <= a_j`がpair比較で既知なので、`a_j`より右を探す必要がない。挿入後は`winnerPos`を更新して現在位置を追跡する。
-
-想定Q: なぜJacobsthal順か。  
-挿入群を降順で処理して探索範囲を`2^k - 1`付近に揃え、binary insertionのworst comparisonsを抑えるため。
-
-想定Q: stragglerはどう扱うか。  
-仮想pending index `k+1`として同じJacobsthal順へ入れ、探索上限だけchain全体にする。
-
-想定Q: 計測範囲は。  
-token→int、container格納、Ford–Johnson、結果container構築まで。入力妥当性検査は表示前に必要なので`parseInput`で先に行う。
-
-入力はpositive integerのみで`0`と負数を拒否。重複はsubjectが裁量としているため受理する。
-
-### 比較回数の実測
-
-監査用copyでpair比較とbinary-search比較だけをcountし、n=1〜10の全4,037,913 permutationを列挙した。
+監査用一時copyでpair比較とbinary-search比較をcountし、n=1〜10の全4,037,913 permutationを列挙した履歴測定である。提出実装にinstrumentは残していない。
 
 | n | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
-|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | measured worst | 0 | 1 | 3 | 5 | 7 | 10 | 13 | 16 | 19 | 22 |
 | Ford–Johnson bound | 0 | 1 | 3 | 5 | 7 | 10 | 13 | 16 | 19 | 22 |
 
-全て`sum ceil(log2(3k/4))`と一致。計測codeは提出実装に残していない。
-
-## 最終検証
-
-2026-07-21実測(検証スクリプトにsubject実行例照合・静的sweep・コンパイルコマンドフラグ検証の計21ケースを追加後):
+## 最終verification結果
 
 | Check | Result |
 |---|---|
-| macOS verification script | 159 PASS / 0 FAIL / Valgrindのみ1 SKIP |
-| macOS ASan + UBSan | 16/16 binary PASS |
-| Docker Ubuntu 24.04 aarch64 (g++ 13.3.0) verification script | 176 PASS / 0 FAIL / 0 SKIP |
-| Linux Valgrind 3.22.0 | 17/17 case PASS |
-| Docker Ubuntu 24.04 amd64 (qemu、Valgrindなし) | 159 PASS / 0 FAIL / 1 SKIP |
-| Linux regular build / no-relink | 16/16 / 16/16 |
-| Linux `-pedantic-errors` | 16/16 |
+| macOS Apple clang 21 | `./scripts/verify_cpp05_09.sh`: 176 PASS / 0 FAIL / 1 SKIP（Valgrind unavailableのみ）。`cpp05/ex02/verifier_preserves_shrubbery`はscript後もpreserved、exit 0。 |
+| Ubuntu 24.04 Docker（g++ / Valgrind） | verifier: 193 PASS / 0 FAIL / 0 SKIP。ValgrindはArray例外経路+全16 binaryの17ケース全PASS。 |
+| macOS ASan + UBSan | 全16 binary: 16/16 PASS。Apple ASanは`detect_leaks=0`で実行し、leak検査はLinux Valgrindで補完。 |
+| btc current EvalHub `input.csv` | header+21 dataをexit 0で処理し、21 output lines。bad value後も継続、exact/lower dateを確認。 |
+| RPN advanced | 指定3式の結果: `42`、`42`、`15`。 |
+| PmergeMe | n=5〜10固定、3000 descending、500 deterministic property、3000 random duplicatesでvector/deque双方のsorted+multiset PASS。 |
+| 独立diff review | 初回P2（5〜10固定証跡不足）を修正後、scoped re-reviewは承認・指摘なし。 |
+| 静的検査 | `git diff --check`、`bash -n` PASS。 |
 
-参考: 2026-07-20のUTM Ubuntu 24.04実測はケース追加前で155 PASS / 0 FAIL / 0 SKIP。
-| Standalone headers | 26/26 |
-| Linux Valgrind 3.22.0 | Array例外経路 + 16/16 binary PASS |
-| PmergeMe | 3000降順 + 500 property cases + comparisons総当たり PASS |
-
-現時点でCPP05〜CPP09の提出blockerは確認されていません。
+結果: current EvalHub HTML criteria、取得可能な履歴PDF、実装、上記fresh evidenceの確認範囲でblockerなし。提出可能・defense-ready。

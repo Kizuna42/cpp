@@ -2,12 +2,25 @@
 
 set -uo pipefail
 
-ROOT=$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-TESTS="$ROOT/tests/cpp05_09"
+SOURCE_ROOT=$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 if ! RUN_DIR=$(mktemp -d "${TMPDIR:-/tmp}/cpp05-09-verify.XXXXXX"); then
 	printf 'Error: could not create verification directory.\n' >&2
 	exit 1
 fi
+trap 'rm -rf "$RUN_DIR"' EXIT
+WORK_ROOT="$RUN_DIR/worktree"
+if ! mkdir "$WORK_ROOT"; then
+	printf 'Error: could not create verification worktree.\n' >&2
+	exit 1
+fi
+for source_dir in cpp05 cpp06 cpp07 cpp08 cpp09 tests; do
+	if ! cp -R "$SOURCE_ROOT/$source_dir" "$WORK_ROOT/"; then
+		printf 'Error: could not copy %s into verification worktree.\n' "$source_dir" >&2
+		exit 1
+	fi
+done
+ROOT="$WORK_ROOT"
+TESTS="$ROOT/tests/cpp05_09"
 PASS=0
 FAIL=0
 SKIP=0
@@ -208,7 +221,18 @@ expect_contains 'cpp06 ex01 pointer roundtrip' 'Pointers equal: PASS' "$ROOT/cpp
 expect_contains 'cpp06 ex02 identify' $'Testing A instance:\nA\nA' "$ROOT/cpp06/ex02/identify"
 expect_contains 'cpp07 ex00 subject' 'min(a, b) = 2' "$ROOT/cpp07/ex00/whatever"
 expect_contains 'cpp07 ex01 subject' $'0\n1\n2\n3\n4\n42\n42\n42\n42\n42' "$ROOT/cpp07/ex01/iter"
-expect_contains 'cpp07 ex02 deep copy' 'Copy: Array[4]: {1, 2, 3, 4}' "$ROOT/cpp07/ex02/array_test"
+expect_contains 'cpp07 ex02 submission main default initialization' \
+	'Default initialization: Array[3]: {0, 0, 0}' "$ROOT/cpp07/ex02/array_test"
+expect_contains 'cpp07 ex02 submission main string mutation' \
+	'String original: Array[2]: {changed, beta}' "$ROOT/cpp07/ex02/array_test"
+expect_contains 'cpp07 ex02 submission main string deep copy' \
+	'String copy: Array[2]: {alpha, beta}' "$ROOT/cpp07/ex02/array_test"
+expect_contains 'cpp07 ex02 submission main string assignment copy' \
+	'String assigned: Array[2]: {alpha, beta}' "$ROOT/cpp07/ex02/array_test"
+expect_contains 'cpp07 ex02 submission main const access' \
+	'Const access: alpha' "$ROOT/cpp07/ex02/array_test"
+expect_contains 'cpp07 ex02 submission main const bounds' \
+	'Const bounds: Array index out of bounds' "$ROOT/cpp07/ex02/array_test"
 expect_contains 'cpp08 ex00 easyfind' 'Found first occurrence of 5 at position: 0' "$ROOT/cpp08/ex00/easyfind"
 expect_contains 'cpp08 ex01 subject' $'2\n14' "$ROOT/cpp08/ex01/span"
 expect_contains 'cpp08 ex02 subject' $'17\n1\n5\n3\n5\n737\n0' "$ROOT/cpp08/ex02/mutantstack"
@@ -246,6 +270,34 @@ if c++ -std=c++98 -Wall -Wextra -Werror -I"$ROOT/cpp05/ex02" \
 	fi
 else
 	fail 'cpp05 failed-action harness compile'
+fi
+
+cat >"$RUN_DIR/intern_unknown_form.cpp" <<'EOF'
+#include "Intern.hpp"
+
+#include <exception>
+
+int main(void)
+{
+	Intern intern;
+	try {
+		intern.makeForm("unknown form", "target");
+	} catch (const std::exception&) {
+	}
+	return 0;
+}
+EOF
+if c++ -std=c++98 -Wall -Wextra -Werror -I"$ROOT/cpp05/ex03" \
+	"$RUN_DIR/intern_unknown_form.cpp" "$ROOT/cpp05/ex03/Bureaucrat.cpp" \
+	"$ROOT/cpp05/ex03/AForm.cpp" "$ROOT/cpp05/ex03/ShrubberyCreationForm.cpp" \
+	"$ROOT/cpp05/ex03/RobotomyRequestForm.cpp" \
+	"$ROOT/cpp05/ex03/PresidentialPardonForm.cpp" \
+	"$ROOT/cpp05/ex03/Intern.cpp" -o "$RUN_DIR/intern_unknown_form"; then
+	expect_exact 'cpp05 unknown form is reported by Intern once' \
+		'Intern could not create unknown form: Unknown form type' \
+		"$RUN_DIR/intern_unknown_form"
+else
+	fail 'cpp05 unknown-form harness compile'
 fi
 
 expect_compile_failure 'cpp05 executeAction is not public' \
@@ -323,6 +375,27 @@ expect_absent 'MutantStack has no duplicate or display helpers' \
 	'^[[:space:]]*(size_t|bool|void)[[:space:]]+(size|empty|display|displayReverse)[[:space:]]*\(' \
 	"$ROOT/cpp08/ex02/MutantStack.hpp"
 
+if grep -REq --include='*.cpp' --include='*.hpp' 'std::map' \
+	"$ROOT/cpp09/ex00" && \
+	! grep -REq --include='*.cpp' --include='*.hpp' 'std::(list|vector|deque|stack)' \
+	"$ROOT/cpp09/ex00" && \
+	grep -REq --include='*.cpp' --include='*.hpp' 'std::stack' \
+	"$ROOT/cpp09/ex01" && \
+	grep -REq --include='*.cpp' --include='*.hpp' 'std::list' \
+	"$ROOT/cpp09/ex01" && \
+	! grep -REq --include='*.cpp' --include='*.hpp' 'std::(map|vector|deque)' \
+	"$ROOT/cpp09/ex01" && \
+	grep -REq --include='*.cpp' --include='*.hpp' 'std::vector' \
+	"$ROOT/cpp09/ex02" && \
+	grep -REq --include='*.cpp' --include='*.hpp' 'std::deque' \
+	"$ROOT/cpp09/ex02" && \
+	! grep -REq --include='*.cpp' --include='*.hpp' 'std::(map|list|stack)' \
+	"$ROOT/cpp09/ex02"; then
+	pass 'cpp09 exercises do not reuse containers'
+else
+	fail 'cpp09 exercises do not reuse containers'
+fi
+
 for dir in "${dirs[@]}"; do
 	if (cd "$ROOT/$dir" && make fclean >/dev/null && \
 		make CXXFLAGS='-Wall -Wextra -Werror -std=c++98 -pedantic-errors' \
@@ -335,6 +408,12 @@ for dir in "${dirs[@]}"; do
 done
 
 expect_exact 'RPN integer division at each step' '4' "$ROOT/cpp09/ex01/RPN" '5 2 / 2 *'
+expect_exact 'RPN EvalHub case 42 one' '42' "$ROOT/cpp09/ex01/RPN" \
+	'8 9 * 9 - 9 - 9 - 4 - 1 +'
+expect_exact 'RPN EvalHub case 42 two' '42' "$ROOT/cpp09/ex01/RPN" \
+	'9 8 * 4 * 4 / 2 + 9 - 8 - 8 - 1 - 6 -'
+expect_exact 'RPN EvalHub case 15' '15' "$ROOT/cpp09/ex01/RPN" \
+	'1 2 * 2 / 2 + 5 * 6 - 1 3 * - 4 5 * * 8 /'
 expect_error 'RPN rejects empty expression' 'Error' "$ROOT/cpp09/ex01/RPN" ''
 expect_error 'RPN rejects decimal token' 'Error' "$ROOT/cpp09/ex01/RPN" '1.5 2 +'
 expect_error 'RPN rejects malformed expression' 'Error' "$ROOT/cpp09/ex01/RPN" '1 2'
@@ -351,6 +430,30 @@ expect_contains 'PmergeMe two values' 'After:  1 2' "$ROOT/cpp09/ex02/PmergeMe" 
 expect_contains 'PmergeMe accepts explicit plus' 'After:  1 2 3' "$ROOT/cpp09/ex02/PmergeMe" +3 1 2
 expect_contains 'PmergeMe sorted input' 'After:  1 2 3 4 5' "$ROOT/cpp09/ex02/PmergeMe" 1 2 3 4 5
 expect_contains 'PmergeMe duplicates' 'After:  1 3 5 5' "$ROOT/cpp09/ex02/PmergeMe" 5 3 5 1
+
+manual_cases=(
+	'5:9 3 9 1 7'
+	'6:8 2 6 2 5 1'
+	'7:10 4 8 4 9 1 3'
+	'8:11 5 2 5 10 3 8 1'
+	'9:12 6 3 6 11 2 9 1 4'
+	'10:13 7 4 7 12 3 10 1 9 5'
+)
+for manual_case in "${manual_cases[@]}"; do
+	IFS=':' read -r manual_size manual_input <<< "$manual_case"
+	read -r -a manual_values <<< "$manual_input"
+	if pmerge_output=$("$ROOT/cpp09/ex02/PmergeMe" "${manual_values[@]}"); then
+		pmerge_after=$(grep '^After:' <<< "$pmerge_output" | sed 's/^After:[[:space:]]*//')
+		pmerge_expected=$(printf '%s\n' "${manual_values[@]}" | sort -n | paste -sd ' ' -)
+		if [[ "$pmerge_after" == "$pmerge_expected" ]]; then
+			pass "PmergeMe EvalHub manual n=$manual_size"
+		else
+			fail "PmergeMe EvalHub manual n=$manual_size"
+		fi
+	else
+		fail "PmergeMe EvalHub manual n=$manual_size"
+	fi
+done
 
 descending=()
 expected_values=()
@@ -395,6 +498,22 @@ if [[ $property_ok -eq 1 ]]; then
 	pass 'PmergeMe property 500 deterministic cases'
 else
 	fail 'PmergeMe property 500 deterministic cases'
+fi
+
+random_duplicates=()
+for ((i = 0; i < 3000; i++)); do
+	random_duplicates+=("$(( (i * i * 19 + i * 73 + 11) % 137 + 1 ))")
+done
+if pmerge_output=$("$ROOT/cpp09/ex02/PmergeMe" "${random_duplicates[@]}"); then
+	pmerge_after=$(grep '^After:' <<< "$pmerge_output" | sed 's/^After:[[:space:]]*//')
+	pmerge_expected=$(printf '%s\n' "${random_duplicates[@]}" | sort -n | paste -sd ' ' -)
+	if [[ "$pmerge_after" == "$pmerge_expected" ]]; then
+		pass 'PmergeMe 3000 random duplicates preserves multiset'
+	else
+		fail 'PmergeMe 3000 random duplicates preserves multiset'
+	fi
+else
+	fail 'PmergeMe 3000 random duplicates preserves multiset'
 fi
 
 if btc_output=$(run_btc "$TESTS/btc_edge.txt" 2>&1); then

@@ -41,8 +41,7 @@ int main(void)
 
 	try {
 		processForm(intern, master, "coffee making", "espresso");
-	} catch (const std::exception& error) {
-		std::cout << error.what() << std::endl;
+	} catch (const std::exception&) {
 	}
 	return 0;
 }
