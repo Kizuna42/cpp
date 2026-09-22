@@ -1,4 +1,83 @@
-Based on the provided PDF file (Subject for C++ Module 06), here is the accurate transcription of the exercises and submission guidelines.
+Transcription of the official PDF "C++ - Module 06 / C++ casts" (Version 8.1, 15 pages).
+
+Chapters I through III and V through VIII are transcribed below. Chapter IV
+("AI Instructions") states 42's position on the use of AI during the Common
+Core; it carries no technical requirement for the exercises and is summarised
+rather than transcribed.
+
+-----
+
+### Chapter I
+
+### Introduction
+
+  * C++ is a general-purpose programming language created by Bjarne Stroustrup as an extension of the C programming language, often referred to as "C with Classes".
+  * The goal of these modules is to introduce you to **Object-Oriented Programming**. This will be the starting point of your C++ journey.
+  * As C++ is a complex language, your code will adhere to the **C++98 standard** to keep things simple.
+  * Modern C++ differs significantly in many aspects. Becoming a proficient C++ developer beyond the 42 Common Core is up to you.
+
+-----
+
+### Chapter II
+
+### General rules
+
+**Compiling**
+
+  * Compile your code with `c++` and the flags `-Wall -Wextra -Werror`.
+  * Your code should still compile if you add the flag `-std=c++98`.
+
+**Formatting and naming conventions**
+
+  * The exercise directories will be named this way: `ex00`, `ex01`, ... , `exn`.
+  * Name your files, classes, functions, member functions and attributes as required in the guidelines.
+  * Write class names in **UpperCamelCase** format. Files containing class code will always be named according to the class name. For instance: `ClassName.hpp`/`ClassName.h`, `ClassName.cpp`, or `ClassName.tpp`.
+  * Unless specified otherwise, every output message must end with a newline character and be displayed to the standard output.
+  * *Goodbye Norminette!* No coding style is enforced in the C++ modules. But keep in mind that code your peer evaluators can't understand is code they can't grade.
+
+**Allowed/Forbidden**
+
+  * You are allowed to use almost everything from the standard library.
+  * You can't use any other external library. C++11 (and derived forms) and Boost libraries are forbidden. The following functions are forbidden too: `*printf()`, `*alloc()` and `free()`. **If you use them, your grade will be 0.**
+  * Unless explicitly stated otherwise, the `using namespace <ns_name>` and `friend` keywords are forbidden. **Otherwise, your grade will be -42.**
+  * You are allowed to use the STL **only in Modules 08 and 09**. That means no Containers (vector/list/map, and so forth) and no Algorithms (anything that requires including the `<algorithm>` header) until then. **Otherwise, your grade will be -42.**
+
+**A few design requirements**
+
+  * Memory leakage occurs in C++ too. When you allocate memory (by using the `new` keyword), you must avoid **memory leaks**.
+  * From Module 02 to Module 09, your classes must be designed in the **Orthodox Canonical Form, except when explicitly stated otherwise**.
+  * Any function implementation put in a header file (except for function templates) **means 0 to the exercise**.
+  * You should be able to use each of your headers independently from others. Thus, they must include all the dependencies they need. However, you must avoid the problem of double inclusion by adding **include guards**. **Otherwise, your grade will be 0.**
+
+**Read me**
+
+  * You can add some additional files if you need to (i.e., to split your code), as long as you turn in the mandatory files.
+  * Sometimes, the guidelines of an exercise look short but the examples can show requirements that are not explicitly written in the instructions.
+  * Read each module completely before starting.
+  * Regarding the Makefile for C++ projects, the same rules as in C apply (see the Norm chapter about the Makefile).
+
+-----
+
+### Chapter III
+
+### Additional Rule
+
+The following rule applies to the entire module and is mandatory.
+
+  * **For each exercise, type conversion must be handled using a specific type of casting. Your choice will be reviewed during the defense.**
+
+-----
+
+### Chapter IV
+
+### AI Instructions (summary)
+
+Not a technical requirement. 42 states that foundational learning requires
+genuine intellectual effort, that AI should not be asked for direct answers,
+and that peer learning is expected. During exams no AI is available, so
+over-reliance surfaces there. Refer to the dedicated FAQ on the intranet.
+
+-----
 
 ### Chapter V
 
