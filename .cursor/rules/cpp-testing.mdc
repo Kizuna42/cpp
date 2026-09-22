@@ -22,7 +22,7 @@ Before submitting any exercise, verify:
 
 ## Testing Strategy
 
-1. **Compile all exercises**: Test every module systematically
+1. **Compile affected exercises**: Test changed exercises and shared dependencies. Run every module only for a requested full audit or submission review.
 2. **Run basic tests**: Verify programs execute without crashes
 3. **Check output format**: Ensure proper newline endings
 4. **Validate requirements**: Confirm all assignment requirements met

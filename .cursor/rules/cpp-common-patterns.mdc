@@ -1,5 +1,5 @@
 ---
-globs: *.cpp,*.hpp
+globs: "*.cpp,*.hpp"
 description: Common C++ patterns and best practices for 42 exercises
 ---
 
@@ -77,7 +77,7 @@ public:
 
 class Derived : public Base {
 public:
-    void doSomething() override;     // Override implementation
+    virtual void doSomething();     // C++98 virtual dispatch
 };
 ```
 

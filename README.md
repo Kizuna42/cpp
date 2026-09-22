@@ -4,7 +4,7 @@ C++98でC++の基礎からSTLまでを学ぶ42 Schoolの演習リポジトリで
 
 ## 現在の検証範囲
 
-2026-07-21にCPP05〜CPP09の全16 Exerciseを、ローカルの公式subject PDFと照合して再監査しました(2026-07-20監査の再実証+検証強化)。
+2026-09-02にCPP05〜CPP09の全16 Exerciseを、current 42 EvalHub HTML criteriaと全sourceに対して最終再監査しました。監査対象source baselineはcommit `e04faff6cdb55e15fa7be1f287fc512235a9d742`で、監査開始時はGitHub `main`とlocal `main`が一致し、worktreeはcleanでした。
 
 - CPP05: 4 Exercise
 - CPP06: 3 Exercise
@@ -12,7 +12,7 @@ C++98でC++の基礎からSTLまでを学ぶ42 Schoolの演習リポジトリで
 - CPP08: 3 Exercise
 - CPP09: 3 Exercise
 
-この監査では、macOS/Apple clang 21とDocker Ubuntu 24.04 aarch64/g++ 13.3の両方でC++98ビルド・動作・境界値を確認し、UbuntuではValgrind 3.22.0も実行しています。検証スクリプトにはsubject実行例との完全一致照合と禁止パターン静的検査を追加済みです。CPP00〜CPP04は今回の監査対象外です。古い評価結果を現在の検証結果として扱わないでください。
+今回のfresh証拠はmacOS/Apple clang 21での検証スクリプト、全16 binaryのASan+UBSan、current EvalHub `input.csv`、全実装のsource reviewです。Ubuntu/Valgrindは2026-08-24の履歴証拠として分離しています。検証スクリプトにはsubject実行例との完全一致照合と禁止パターン静的検査を含みます。CPP00〜CPP04は今回の監査対象外です。
 
 詳細は次の資料を参照してください。
 
@@ -88,9 +88,9 @@ docker run --rm -v /path/to/cpp:/src:ro ubuntu:24.04 bash -c \
 
 | 環境 | 結果 |
 |---|---|
-| macOS 26.5.2 arm64 / Apple clang 21 | 159 PASS / 0 FAIL / Valgrindのみ1 SKIP |
-| macOS ASan + UBSan | 16/16 binary PASS |
-| Docker Ubuntu 24.04 aarch64 / g++ 13.3.0 / Valgrind 3.22.0 | 176 PASS / 0 FAIL / 0 SKIP(Valgrind 17/17) |
-| Docker Ubuntu 24.04 amd64(qemu、build+機能のみ) | 159 PASS / 0 FAIL / Valgrindのみ1 SKIP |
+| macOS 26.6.2 arm64 / Apple clang 21（2026-09-02 fresh） | 176 PASS / 0 FAIL / Valgrindのみ1 SKIP |
+| macOS ASan + UBSan（2026-09-02 fresh） | 16/16 binary PASS |
+| current EvalHub `input.csv`（2026-09-02 fresh） | header+21 dataをexit 0で処理、exact/closest-lowerを手計算照合 |
+| Docker Ubuntu 24.04 aarch64 / g++ 13.3.0 / Valgrind 3.22.0（2026-08-24履歴） | 193 PASS / 0 FAIL / 0 SKIP（Valgrind 17/17） |
 
-監査日: 2026-07-21(前回2026-07-20のUTM Ubuntu実測 155/0/0 は検証ケース追加前の値)
+最終監査日: 2026-09-02

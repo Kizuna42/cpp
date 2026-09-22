@@ -1,6 +1,6 @@
 # CPP05-09 Defense Notes
 
-2026-08-24版。42 EvalHubで確認した現行HTML criteriaを基準に、実装者がreviewで説明・実演するための防御ノートである。最終fresh verificationは完了し、確認範囲で提出可能・defense-readyと判定した。最新subject PDF CDNは404のため、基準の範囲は[包括評価レポート](COMPREHENSIVE_EVALUATION.md)のprovenanceを参照する。
+2026-09-02最終監査版。current 42 EvalHub HTML criteriaを基準に、CPP05〜CPP09をreviewで説明・実演するための防御ノートである。監査対象source baseline `e04faff6cdb55e15fa7be1f287fc512235a9d742`を全source確認し、指定repo内はcode-readyと判定した。実際の提出可否は、Intraが参照する公式repo/branchとこのsourceの同一性確認を条件とする。current subject PDF CDNは404のため、基準の範囲は[包括評価レポート](COMPREHENSIVE_EVALUATION.md)のprovenanceを参照する。
 
 ## 共通review contract
 
@@ -8,6 +8,29 @@
 - non-template実装をheaderに置かず、`printf`系、`alloc`系、`free`、`using namespace`、`friend`、外部libraryを使わない。
 - evaluatorがmainを差し替える前提で、公開API・const性・例外型・出力をsubjectどおりに説明する。自作mainが通るだけでは合格根拠にしない。
 - 質問に答えられない、ライブ変更後にbuildできない、例外・不正入力で未定義動作またはリークがある場合は、そのExerciseをstopする。
+
+## ライブコーディング・口頭質問への対応
+
+2026-09-02時点のEvalHub CPP05〜09には、独立した「Live coding」採点欄はない。ただし、evaluatorはmain差し替え、追加case、設計説明を求められる。提出sourceの編集は本来不要というEvalHub guidelineがあるため、変更を求められたら意図を確認し、合意後に最小のtestだけを追加する。
+
+回答は次の順で行う。
+
+1. 先に結論を一文で答える。例: 「reference `dynamic_cast`は失敗時に例外、pointer版はNULLです」。
+2. その根拠となるclass invariant、関数、所有権をsource上で指す。
+3. 正常系1本か致命的失敗1本だけを小さなmainで実演する。既存の提出mainを大改造しない。
+4. `c++ -Wall -Wextra -Werror -std=c++98`でcompileし、終了codeと出力を一緒に確認する。
+5. 実演後に「何を証明したか」を一文でまとめる。通ったことだけでなく、なぜその結果になるか説明する。
+
+提出fileを汚さず試す例:
+
+```bash
+c++ -Wall -Wextra -Werror -std=c++98 \
+  -Icpp05/ex00 /tmp/evaluator_main.cpp cpp05/ex00/Bureaucrat.cpp \
+  -o /tmp/cpp-evaluator-check
+/tmp/cpp-evaluator-check
+```
+
+分からない質問で推測しない。「確認したい前提はXです」と切り分け、該当sourceを見てから答える。表の「想定質問」「ライブコーディング案」が各exerciseの最短回答である。
 
 ## CPP05 — Repetition and Exceptions
 
@@ -100,13 +123,72 @@
 
 | Check | Result |
 |---|---|
-| macOS Apple clang 21 | `./scripts/verify_cpp05_09.sh`: 176 PASS / 0 FAIL / 1 SKIP（Valgrind unavailableのみ）。`cpp05/ex02/verifier_preserves_shrubbery`はscript後もpreserved、exit 0。 |
-| Ubuntu 24.04 Docker（g++ / Valgrind） | verifier: 193 PASS / 0 FAIL / 0 SKIP。ValgrindはArray例外経路+全16 binaryの17ケース全PASS。 |
-| macOS ASan + UBSan | 全16 binary: 16/16 PASS。Apple ASanは`detect_leaks=0`で実行し、leak検査はLinux Valgrindで補完。 |
-| btc current EvalHub `input.csv` | header+21 dataをexit 0で処理し、21 output lines。bad value後も継続、exact/lower dateを確認。 |
+| macOS 26.6.2 / Apple clang 21（2026-09-02 fresh） | `./scripts/verify_cpp05_09.sh`: 176 PASS / 0 FAIL / 1 SKIP（Valgrind unavailableのみ）。 |
+| macOS ASan + UBSan（2026-09-02 fresh） | 全16 binary: 16/16 PASS。Apple ASanは`detect_leaks=0`で実行。 |
+| btc current EvalHub `input.csv`（2026-09-02 fresh） | header+21 dataをexit 0で処理し、21 output lines。exact 2011-09-14=6.19、closest-lower 2010-11-03→2010-11-02=0.21、2020-06-26→2020-06-25=9276.58を照合。 |
 | RPN advanced | 指定3式の結果: `42`、`42`、`15`。 |
 | PmergeMe | n=5〜10固定、3000 descending、500 deterministic property、3000 random duplicatesでvector/deque双方のsorted+multiset PASS。 |
-| 独立diff review | 初回P2（5〜10固定証跡不足）を修正後、scoped re-reviewは承認・指摘なし。 |
-| 静的検査 | `git diff --check`、`bash -n` PASS。 |
+| Ubuntu 24.04 Docker（2026-08-24履歴） | verifier: 193 PASS / 0 FAIL / 0 SKIP。ValgrindはArray例外経路+全16 binaryの17ケース全PASS。 |
+| 静的検査 | 16 Exerciseのsource review、禁止構文、26 header単体、Makefile/compile flags PASS。 |
 
-結果: current EvalHub HTML criteria、取得可能な履歴PDF、実装、上記fresh evidenceの確認範囲でblockerなし。提出可能・defense-ready。
+結果: 指定repo内はcurrent EvalHub HTML criteria、取得可能な履歴PDF、実装、上記fresh evidenceの確認範囲でblockerなし・code-ready。公式提出repo/branchとの同一性確認がPASSすれば提出可能・defense-ready。
+
+## 提出当日の最終チェック
+
+1. Intraで今提出するproject（CPP05、06、07、08、09のどれか）と公式Git URLを確認する。このmonorepoのrootではなく、公式提出repoのroot直下に対象moduleの`ex00`〜`exNN`が並ぶことを確認する。
+2. 空directoryへ公式提出repoをcloneする。既存working treeだけで判定しない。
+3. clone先で`git status -sb`、`git log -1 --oneline`、`git diff --check`を実行する。uncommitted file、誤branch、生成binary、`.o`、`*_shrubbery`がないことを確認する。
+4. 下記の比較をmonorepo rootで実行する。`module`と`submission_dir`を実際の対象へ置き換え、監査baselineから展開したExercise一覧と各directoryの`diff`が無出力・exit 0になることを確認する。これにより、後日変更され得るworking treeではなく、監査済みsourceと実際の提出物が同一だと証明する。
+5. 各exerciseで`make re`を実行し、必須flagsと`c++`を目視する。実行後は`make fclean`する。
+6. 比較に使った監査baselineの一時directoryで`./scripts/verify_cpp05_09.sh`を実行し、`fail=0`を確認する。ValgrindなしのMacでは1 SKIPは想定どおりである。比較後に公式cloneを変更した場合は手順4からやり直す。
+7. evaluatorが使う代表caseを口頭説明つきで再実行する。CPP09は`input.csv`、RPNのadvanced 3式、PmergeMeの5〜10件と3000件を優先する。
+8. 最後のcommitを公式remoteへpushし、local HEADとremote branch SHAが同じことを確認する。Intra上の提出project/branchが正しいことも再確認する。
+
+```bash
+set -euo pipefail
+baseline=e04faff6cdb55e15fa7be1f287fc512235a9d742
+module=cpp05
+submission_dir=/absolute/path/to/official-clone
+baseline_dir=$(mktemp -d /tmp/cpp-audited-baseline.XXXXXX)
+git archive "$baseline" | tar -x -C "$baseline_dir"
+audited_module="$baseline_dir/$module"
+
+diff -u \
+  <(find "$audited_module" -maxdepth 1 -type d -name 'ex*' -exec basename {} \; | sort) \
+  <(find "$submission_dir" -maxdepth 1 -type d -name 'ex*' -exec basename {} \; | sort)
+for exercise_dir in "$audited_module"/ex*; do
+  exercise_name=${exercise_dir##*/}
+  diff -ru --exclude='.DS_Store' "$exercise_dir" "$submission_dir/$exercise_name" || exit 1
+done
+
+git -C "$submission_dir" diff --check
+worktree_status=$(git -C "$submission_dir" status --porcelain)
+if [ -n "$worktree_status" ]; then
+  printf '%s\n' 'ERROR: official clone is dirty'
+  exit 1
+fi
+git -C "$submission_dir" log -1 --oneline
+branch=$(git -C "$submission_dir" branch --show-current)
+if [ -z "$branch" ]; then
+  printf '%s\n' 'ERROR: detached HEAD'
+  exit 1
+fi
+local_sha=$(git -C "$submission_dir" rev-parse HEAD)
+remote_sha=$(git -C "$submission_dir" ls-remote --exit-code origin "refs/heads/$branch" | awk 'NR == 1 {print $1}')
+if [ -z "$local_sha" ] || [ -z "$remote_sha" ]; then
+  printf '%s\n' 'ERROR: local or remote SHA is empty'
+  exit 1
+fi
+if [ "$local_sha" != "$remote_sha" ]; then
+  printf 'ERROR: local=%s remote=%s\n' "$local_sha" "$remote_sha"
+  exit 1
+fi
+printf 'OK: %s %s\n' "$branch" "$local_sha"
+
+(
+  cd "$baseline_dir"
+  ./scripts/verify_cpp05_09.sh
+)
+```
+
+評価中は質問に即答するため、対象moduleだけを開いておく。自動testの数値を暗記するより、各classの不変条件、例外条件、container選定、所有権をsource上で指せることを優先する。
