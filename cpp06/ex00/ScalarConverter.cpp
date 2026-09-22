@@ -182,8 +182,9 @@ static bool isDouble(const std::string &literal)
 
 static bool isPseudoLiteral(const std::string &literal)
 {
-	return (literal == "-inff" || literal == "+inff" || literal == "nanf" ||
-			literal == "-inf" || literal == "+inf" || literal == "nan");
+	return (literal == "-inff" || literal == "+inff" || literal == "inff" ||
+			literal == "nanf" || literal == "-inf" || literal == "+inf" ||
+			literal == "inf" || literal == "nan");
 }
 
 static void convertFromChar(char c)
@@ -288,41 +289,21 @@ static void convertPseudoLiteral(const std::string &literal)
 	displayChar(0, true);
 	displayInt(0, true);
 
-	if (literal == "-inff" || literal == "+inff" || literal == "nanf")
+	// An unsigned "inf"/"inff" is treated as positive infinity.
+	if (literal == "nan" || literal == "nanf")
 	{
-		if (literal == "-inff")
-		{
-			displayFloat(-std::numeric_limits<float>::infinity());
-			displayDouble(-std::numeric_limits<double>::infinity());
-		}
-		else if (literal == "+inff")
-		{
-			displayFloat(std::numeric_limits<float>::infinity());
-			displayDouble(std::numeric_limits<double>::infinity());
-		}
-		else
-		{
-			displayFloat(std::numeric_limits<float>::quiet_NaN());
-			displayDouble(std::numeric_limits<double>::quiet_NaN());
-		}
+		displayFloat(std::numeric_limits<float>::quiet_NaN());
+		displayDouble(std::numeric_limits<double>::quiet_NaN());
+	}
+	else if (literal[0] == '-')
+	{
+		displayFloat(-std::numeric_limits<float>::infinity());
+		displayDouble(-std::numeric_limits<double>::infinity());
 	}
 	else
 	{
-		if (literal == "-inf")
-		{
-			displayFloat(-std::numeric_limits<float>::infinity());
-			displayDouble(-std::numeric_limits<double>::infinity());
-		}
-		else if (literal == "+inf")
-		{
-			displayFloat(std::numeric_limits<float>::infinity());
-			displayDouble(std::numeric_limits<double>::infinity());
-		}
-		else
-		{
-			displayFloat(std::numeric_limits<float>::quiet_NaN());
-			displayDouble(std::numeric_limits<double>::quiet_NaN());
-		}
+		displayFloat(std::numeric_limits<float>::infinity());
+		displayDouble(std::numeric_limits<double>::infinity());
 	}
 }
 
