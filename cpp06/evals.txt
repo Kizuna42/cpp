@@ -27,7 +27,7 @@
 * Any of these means that you must flag the project with "Forbidden Function":
     * Use of a "C" function (*alloc, *printf, free).
     * Use of a function not allowed in the exercise guidelines.
-    * Use of "using namespace" or the "friend" keyword.
+    * Use of "using namespace <ns_name>" or the "friend" keyword.
     * Use of an external library, or features from versions other than $C++98$.
 
 ### Ex00: Conversion of scalar types
@@ -36,8 +36,10 @@ Exercise 00 の評価項目です。
 * This exercise is about using the static_cast.
 
 **Scalar conversion**
-* Does the program work as required? Did the student use the static_cast to convert values?
-* We'll accept the use of implicit casts for promotion casts only.
+* Did the student create a class with a private constructor, and static methods ?
+* Did the student use the static_cast to convert values?
+* Accept the use of implicit casts for promotion casts only.
+* Does the program work as required?
 * Anyway, please don't be too uncompromising towards the exercise's outputs if the spirit of the exercise is respected.
 * Even if this exercise is wrong, continue the evaluation process.
 
@@ -48,10 +50,11 @@ Exercise 01 の評価項目です。
 
 **Retyping of raw data**
 * Does the program work as required?
-* The reinterpret_cast<> should be used twice.
-* First from data to uintptr_t.
-* Then, from uintptr_t to data*.
-* And the final data struct should be usable.
+* Did the student create a class with a private constructor, and static methods ?
+* The reinterpret_cast<> should be used twice:
+    * First from data* to uintptr_t.
+    * Then, from uintptr_t to data*.
+* And the resulting data struct should be usable.
 
 ### Ex02: Identify real type
 Exercise 02 の評価項目です。
@@ -63,4 +66,4 @@ Exercise 02 の評価項目です。
 * Check the code. Did the student use the dynamic_cast to identify the real type?
 * void identify (Base* p) should check if the cast return is NULL.
 * void identify (Base& p) should use a try and catch block to check if the cast failed.
-* (In case you're wondering, the header must not appear anywhere.)
+* (In case you're wondering, the header <typeinfo> must not appear anywhere.)
