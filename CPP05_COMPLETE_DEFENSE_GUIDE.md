@@ -8,9 +8,9 @@
 
 | 読む人 | 推奨ルート |
 |---|---|
-| レビュワー | [§1 要点カード](#1-要点カード) → [§2 評価項目の対応表](#2-評価項目の対応表) → 該当 Exercise 節 → [§8 指摘されうる点](#8-指摘されうる点) |
-| 実装者（復習） | [§3 全体設計](#3-全体設計) → ex00〜ex03 を順に読み、各節末の「学習メモ」で詰まった箇所を確認する |
-| 防衛直前 | [§1 要点カード](#1-要点カード) と [§9 想定質問](#9-想定質問) だけ |
+| レビュワー | [§1 要点カード](#1-要点カード) → 該当 Exercise 節 → [§7 指摘されうる点](#7-指摘されうる点) |
+| 実装者（復習） | [§2 全体設計](#2-全体設計) → ex00〜ex03 を順に読み、各節末の「学習メモ」で詰まった箇所を確認する |
+| 防衛直前 | [§1 要点カード](#1-要点カード) と [§8 想定質問](#8-想定質問) だけ |
 
 コード参照はすべてリポジトリ内の実ファイルへのリンクである。文章と実装が食い違っていたら**実装が正**。
 
@@ -42,31 +42,7 @@ Intern が知っている名前（完全一致）:
 
 ---
 
-## 2. 評価項目の対応表
-
-[cpp05/evals.txt](cpp05/evals.txt) の項目と、この文書・実装の対応。
-
-| 評価項目 | 実装 | 解説 |
-|---|---|---|
-| Makefile が適切なフラグでコンパイルする | 各 `exNN/Makefile` | [§10 検証](#10-検証手順と実際の出力) |
-| constant name を持つ Bureaucrat | [Bureaucrat.hpp#L10](cpp05/ex00/Bureaucrat.hpp#L10) | [§4](#4-ex00--bureaucrat-と例外) |
-| grade は 1〜150、範囲外は例外 | [Bureaucrat.cpp#L7-L18](cpp05/ex00/Bureaucrat.cpp#L7) | [§4](#4-ex00--bureaucrat-と例外) |
-| increment / decrement も同じ例外 | [Bureaucrat.cpp#L47-L62](cpp05/ex00/Bureaucrat.cpp#L47) | [§4](#4-ex00--bureaucrat-と例外) |
-| 例外は `std::exception` 派生 | [Bureaucrat.hpp#L29-L38](cpp05/ex00/Bureaucrat.hpp#L29) | [§9 想定質問](#9-想定質問) |
-| `<<` オーバーロード | [Bureaucrat.cpp#L75](cpp05/ex00/Bureaucrat.cpp#L75) | [§4](#4-ex00--bureaucrat-と例外) |
-| Form の属性は private（protected ではない） | [Form.hpp#L12-L15](cpp05/ex01/Form.hpp#L12) | [§5](#5-ex01--form-と署名) |
-| name と grade は const | 同上 | [§4 の学習メモ](#学習メモ) |
-| `beSigned()` / `signForm()` | [Form.cpp#L50](cpp05/ex01/Form.cpp#L50) / [Bureaucrat.cpp#L52](cpp05/ex01/Bureaucrat.cpp#L52) | [§5](#5-ex01--form-と署名) |
-| `execute()` は「基底が検査 → 派生が処理」でもよい | [AForm.cpp#L57-L65](cpp05/ex02/AForm.cpp#L57) | [§6](#6-ex02--aform-と-template-method) |
-| concrete form の grade / name / action | [§6 の表](#concrete-form-の仕様) | [§6](#6-ex02--aform-と-template-method) |
-| `makeForm()` は if/elseif 連鎖を避ける | [Intern.cpp#L35-L55](cpp05/ex03/Intern.cpp#L35) | [§7](#7-ex03--intern-と-factory) / [§8.1](#81-関数ポインタ-vs-メンバ関数ポインタ) |
-| メモリリークがないこと | `catch (...)` で解放（[ex03/main.cpp#L12-L22](cpp05/ex03/main.cpp#L12)） | [§10](#10-検証手順と実際の出力) |
-
-> **注意**: evals.txt の Good dispatching 欄は *"array of pointers to **member** functions"* と書かれている。現在の実装は **static メンバ関数を指す通常の関数ポインタ**の配列であり、C++ の型としては非静的メンバ関数ポインタではない。この差は隠さず説明する方針で、詳細は [§8.1](#81-関数ポインタ-vs-メンバ関数ポインタ) に書いた。
-
----
-
-## 3. 全体設計
+## 2. 全体設計
 
 ```mermaid
 classDiagram
@@ -125,7 +101,7 @@ flowchart LR
 
 ---
 
-## 4. ex00 — Bureaucrat と例外
+## 3. ex00 — Bureaucrat と例外
 
 ### subject の要求
 
@@ -180,7 +156,7 @@ flowchart TD
 
 ---
 
-## 5. ex01 — Form と署名
+## 4. ex01 — Form と署名
 
 ### subject の要求
 
@@ -240,9 +216,9 @@ sequenceDiagram
 
 ---
 
-## 6. ex02 — AForm と Template Method
+## 5. ex02 — AForm と Template Method
 
-ここが CPP05 の設計上の山場。subject に「**どちらのやり方でもよいが、一方がよりエレガントだ**」という誘導があり、evals.txt でも両方が valid とされている。
+ここが CPP05 の設計上の山場。subject に「**どちらのやり方でもよいが、一方がよりエレガントだ**」という誘導がある。
 
 ### concrete form の仕様
 
@@ -307,7 +283,7 @@ flowchart TD
 
 ---
 
-## 7. ex03 — Intern と factory
+## 6. ex03 — Intern と factory
 
 ### subject の要求
 
@@ -339,6 +315,8 @@ for (int i = 0; i < numForms; i++)
 
 **form を追加するときに変更するのがデータ（配列の 1 行）だけで、制御構造が変わらないから。** if 連鎖では名前が増えるたびに分岐が伸び、関数の複雑度が上がる。テーブルなら検索ループは永久に 1 つのまま。これが Factory パターンの最小実装である。
 
+テーブルに入れているのが `static` メンバ関数を指す通常の関数ポインタである点については [§7.1](#71-関数ポインタ-vs-メンバ関数ポインタ) に整理した。
+
 ```mermaid
 flowchart LR
     I["Intern::makeForm()"] -->|new して返す| C["呼び出し側が AForm* を所有"]
@@ -363,21 +341,21 @@ delete form;
 ### 学習メモ
 
 - **C++98 には `std::unique_ptr` がない。** だから「例外が飛ぶ経路でも必ず `delete` する」ことを手書きで保証する必要がある。`catch (...) { delete form; throw; }` という定型がそれで、C++11 以降なら `std::unique_ptr` 1 行で消える定型でもある。**RAII が何を自動化してくれているのかを、手で書いて理解した**のがこの Exercise の収穫だった。`delete NULL;` が安全なので、`form = NULL` 初期化と組み合わせれば生成失敗時も同じ経路で書ける。
-- **未知の名前のときは、エラー表示と throw の両方をしている。**（[Intern.cpp#L52-L54](cpp05/ex03/Intern.cpp#L52)）subject の要求は「明示的なエラーメッセージ」だけなので表示で足りるが、呼び出し側が `NULL` チェックを忘れて落ちるのを避けたくて例外も投げている。二重報告である点は自覚しており、[§8.2](#82-intern-の二重報告) に書いた。
+- **未知の名前のときは、エラー表示と throw の両方をしている。**（[Intern.cpp#L52-L54](cpp05/ex03/Intern.cpp#L52)）subject の要求は「明示的なエラーメッセージ」だけなので表示で足りるが、呼び出し側が `NULL` チェックを忘れて落ちるのを避けたくて例外も投げている。二重報告である点は自覚しており、[§7.2](#72-intern-の二重報告) に書いた。
 - `Intern` は状態を持たないので、コピーコンストラクタと代入演算子は `(void)other;` で引数を捨てるだけの実装になる（[Intern.cpp#L11-L18](cpp05/ex03/Intern.cpp#L11)）。OCF の要求を満たすためだけに存在するコードだが、`-Wunused-parameter` を通すために `(void)` キャストが要る。
 
 ---
 
-## 8. 指摘されうる点
+## 7. 指摘されうる点
 
 自分で把握している「ここは突っ込まれうる」箇所。隠さず説明する方針。
 
-### 8.1 関数ポインタ vs メンバ関数ポインタ
+### 7.1 関数ポインタ vs メンバ関数ポインタ
 
-evals.txt の Good dispatching 欄は *"some kind of array of pointers to **member** functions"* と書いている。現在の実装は `static` メンバ関数を指す**通常の関数ポインタ**（[Intern.hpp#L11](cpp05/ex03/Intern.hpp#L11)）で、C++ の型としては `AForm* (Intern::*)(...)` ではない。
+現在の実装は `static` メンバ関数を指す**通常の関数ポインタ**の配列（[Intern.hpp#L11](cpp05/ex03/Intern.hpp#L11)）であり、C++ の型としては非静的メンバ関数ポインタ `AForm* (Intern::*)(...)` ではない。dispatch をメンバ関数ポインタで組むことを求められた場合、この差が論点になる。
 
 - subject 本文の必須要件は「過剰な if/else-if を避ける」であり、テーブル駆動はこれを満たす。
-- evals.txt の文言へ型まで厳密に一致しているとは主張しない。
+- 「メンバ関数ポインタの配列」という形へ、型まで厳密に一致しているとは主張しない。
 - `Intern` は状態を持たないので `static` で十分、というのが選択理由。
 
 非静的メンバ関数ポインタにする場合の形は以下。現提出では採用していない。
@@ -388,21 +366,21 @@ struct FormInfo { std::string name; Creator creator; };
 AForm* newForm = (this->*forms[i].creator)(target);
 ```
 
-### 8.2 Intern の二重報告
+### 7.2 Intern の二重報告
 
-未知の form 名で、`std::cout` への出力と `UnknownFormException` の throw を両方行う。意図は [§7 の学習メモ](#学習メモ-3) のとおりだが、「ライブラリとしては throw だけにして、表示は呼び出し側の責任にすべき」という指摘はもっともである。実際 `Bureaucrat::signForm()` は「表示する側」に徹しており、そちらの分離のほうが一貫している。
+未知の form 名で、`std::cout` への出力と `UnknownFormException` の throw を両方行う。意図は [§6 の学習メモ](#学習メモ-3) のとおりだが、「ライブラリとしては throw だけにして、表示は呼び出し側の責任にすべき」という指摘はもっともである。実際 `Bureaucrat::signForm()` は「表示する側」に徹しており、そちらの分離のほうが一貫している。
 
-### 8.3 `FormNotSignedException` は subject 外の追加
+### 7.3 `FormNotSignedException` は subject 外の追加
 
 subject が挙げるのは `GradeTooHighException` / `GradeTooLowException` の 2 つ。未署名を別の型にしたのは可読性のための独自判断で、要求を減らしてはいないが増やしてはいる。
 
-### 8.4 `static const int` のクラス内初期化
+### 7.4 `static const int` のクラス内初期化
 
 `static const int HIGHEST_GRADE = 1;` のクラス内初期化は C++98 で合法だが、**アドレスを取る（ODR-use する）と定義が別途必要**になる。現在は比較にしか使っておらず該当しない。参照で受け取る関数へ渡すような変更を加えると、リンクエラーになりうる点は認識している。
 
 ---
 
-## 9. 想定質問
+## 8. 想定質問
 
 「こう答える」ではなく「なぜそうなっているか」として整理したもの。
 
@@ -410,19 +388,19 @@ subject が挙げるのは `GradeTooHighException` / `GradeTooLowException` の 
 increment は数値ではなく**地位**を上げる操作だから。1 が最高なので、地位が上がれば数値は減る。
 
 **Q. なぜ検査してから `--` するのか。`--` してから戻せばよいのでは。**
-不変条件を一瞬も壊さないため。途中で例外が飛んだ場合にロールバックが走らない設計を避けた。[§4](#なぜこの設計か) 参照。
+不変条件を一瞬も壊さないため。途中で例外が飛んだ場合にロールバックが走らない設計を避けた。[§3](#なぜこの設計か) 参照。
 
 **Q. コピー代入で name がコピーされないのはバグではないか。**
-`_name` は `const`。代入演算子は**既存オブジェクト**を更新する操作なので、const な identity は変更できない。コピーコンストラクタは新規構築なので初期化リストから const メンバも初期化できる。[§4 の学習メモ](#学習メモ) 参照。
+`_name` は `const`。代入演算子は**既存オブジェクト**を更新する操作なので、const な identity は変更できない。コピーコンストラクタは新規構築なので初期化リストから const メンバも初期化できる。[§3 の学習メモ](#学習メモ) 参照。
 
 **Q. コンストラクタが throw したらデストラクタは呼ばれるか。**
 そのオブジェクトのデストラクタは呼ばれない。ただし初期化済みの基底クラスとメンバは破棄されるのでリークはしない。
 
 **Q. なぜ `catch (const std::exception& e)` で受けるのか。**
-派生した例外型をまとめて捕捉でき（polymorphism）、参照で受けることでスライシングと不要なコピーを避けられるから。これが成立するのは、例外クラスを `std::exception` から派生させているため（evals.txt にも要求がある）。
+派生した例外型をまとめて捕捉でき（polymorphism）、参照で受けることでスライシングと不要なコピーを避けられるから。これが成立するのは、例外クラスを `std::exception` から派生させているため（subject にも明記されている）。
 
 **Q. なぜ検査を基底の `execute()` に集めたのか。**
-署名済みかどうかと実行 grade は**全 form に共通のルール**だから。派生ごとに書くと重複し、追加時の書き忘れが起きる。evals.txt は両方 valid としているが、こちらを選んだ。
+署名済みかどうかと実行 grade は**全 form に共通のルール**だから。派生ごとに書くと重複し、追加時の書き忘れが起きる。subject はどちらでもよいとしているが、こちらを選んだ。
 
 **Q. 派生の `executeAction()` は private なのに、なぜ基底から呼べるのか。**
 アクセスチェックは呼び出し式に現れる静的な型、つまり基底クラスの protected 宣言に対して行われる。実際に飛ぶ先は virtual dispatch が実行時に決めるため、override 側のアクセス指定は一致していなくてよい。
@@ -441,7 +419,7 @@ increment は数値ではなく**地位**を上げる操作だから。1 が最�
 
 ---
 
-## 10. 検証手順と実際の出力
+## 9. 検証手順と実際の出力
 
 以下は `make -C cpp05/exNN re` の後に実行した実際の出力である（macOS / Apple clang、2026-09-22 時点）。
 
@@ -462,7 +440,7 @@ Copy: Frank, bureaucrat grade 42.
 After assignment: George, bureaucrat grade 42.
 ```
 
-Test 7 が [§4 の学習メモ](#学習メモ)で述べた挙動そのもの。代入先 `George` は名前を保ったまま grade だけ 42 になっている。
+Test 7 が [§3 の学習メモ](#学習メモ)で述べた挙動そのもの。代入先 `George` は名前を保ったまま grade だけ 42 になっている。
 
 ### ex01
 
@@ -541,7 +519,7 @@ c++ -Wall -Wextra -Werror -std=c++98 \
 
 ---
 
-## 11. つまずきやすい点の一覧
+## 10. つまずきやすい点の一覧
 
 | 誤解 | 正しい理解 |
 |---|---|
@@ -553,15 +531,14 @@ c++ -Wall -Wextra -Werror -std=c++98 \
 | 基底のデストラクタは空だから virtual 不要 | 基底ポインタから派生を delete するので必要 |
 | コピーコンストラクタと代入演算子は同じ | 代入では const メンバを変更できない |
 | `makeForm()` のポインタは `Intern` が管理する | 呼び出し側が所有し delete する |
-| ヘッダに全部書くほうが簡単 | 非テンプレート実装をヘッダに置くと evals.txt 上その Exercise は採点されない |
-| `using namespace std;` は短くて便利 | 使用すると Forbidden Function フラグの対象 |
+| ヘッダに全部書くほうが簡単 | 非テンプレート実装をヘッダに置くと、その Exercise は評価対象外になる |
+| `using namespace std;` は短くて便利 | subject が禁止しており、使用すると評価が止まる |
 
 ---
 
-## 12. 関連資料
+## 11. 関連資料
 
 - [cpp05/subject.txt](cpp05/subject.txt) — 課題原文
-- [cpp05/evals.txt](cpp05/evals.txt) — 評価項目
 - [REVIEW_NOTES.md](REVIEW_NOTES.md) — CPP05〜09 横断の防衛ノートと提出前チェック
 - [COMPREHENSIVE_EVALUATION.md](COMPREHENSIVE_EVALUATION.md) — 監査レポートと provenance
 - [scripts/verify_cpp05_09.sh](scripts/verify_cpp05_09.sh) — 再現可能な検証スクリプト
