@@ -49,17 +49,17 @@ Intern が知っている名前（完全一致）:
 | 評価項目 | 実装 | 解説 |
 |---|---|---|
 | Makefile が適切なフラグでコンパイルする | 各 `exNN/Makefile` | [§10 検証](#10-検証手順と実際の出力) |
-| constant name を持つ Bureaucrat | [Bureaucrat.hpp#L11](cpp05/ex00/Bureaucrat.hpp#L11) | [§4](#4-ex00--bureaucrat-と例外) |
+| constant name を持つ Bureaucrat | [Bureaucrat.hpp#L10](cpp05/ex00/Bureaucrat.hpp#L10) | [§4](#4-ex00--bureaucrat-と例外) |
 | grade は 1〜150、範囲外は例外 | [Bureaucrat.cpp#L7-L18](cpp05/ex00/Bureaucrat.cpp#L7) | [§4](#4-ex00--bureaucrat-と例外) |
 | increment / decrement も同じ例外 | [Bureaucrat.cpp#L47-L62](cpp05/ex00/Bureaucrat.cpp#L47) | [§4](#4-ex00--bureaucrat-と例外) |
-| 例外は `std::exception` 派生 | [Bureaucrat.hpp#L28-L36](cpp05/ex00/Bureaucrat.hpp#L28) | [§9 想定質問](#9-想定質問) |
+| 例外は `std::exception` 派生 | [Bureaucrat.hpp#L29-L38](cpp05/ex00/Bureaucrat.hpp#L29) | [§9 想定質問](#9-想定質問) |
 | `<<` オーバーロード | [Bureaucrat.cpp#L75](cpp05/ex00/Bureaucrat.cpp#L75) | [§4](#4-ex00--bureaucrat-と例外) |
-| Form の属性は private（protected ではない） | [Form.hpp#L11-L16](cpp05/ex01/Form.hpp#L11) | [§5](#5-ex01--form-と署名) |
+| Form の属性は private（protected ではない） | [Form.hpp#L12-L15](cpp05/ex01/Form.hpp#L12) | [§5](#5-ex01--form-と署名) |
 | name と grade は const | 同上 | [§4 の学習メモ](#学習メモ) |
-| `beSigned()` / `signForm()` | [Form.cpp#L52](cpp05/ex01/Form.cpp#L52) / [Bureaucrat.cpp#L52](cpp05/ex01/Bureaucrat.cpp#L52) | [§5](#5-ex01--form-と署名) |
+| `beSigned()` / `signForm()` | [Form.cpp#L50](cpp05/ex01/Form.cpp#L50) / [Bureaucrat.cpp#L52](cpp05/ex01/Bureaucrat.cpp#L52) | [§5](#5-ex01--form-と署名) |
 | `execute()` は「基底が検査 → 派生が処理」でもよい | [AForm.cpp#L57-L65](cpp05/ex02/AForm.cpp#L57) | [§6](#6-ex02--aform-と-template-method) |
 | concrete form の grade / name / action | [§6 の表](#concrete-form-の仕様) | [§6](#6-ex02--aform-と-template-method) |
-| `makeForm()` は if/elseif 連鎖を避ける | [Intern.cpp#L38-L52](cpp05/ex03/Intern.cpp#L38) | [§7](#7-ex03--intern-と-factory) / [§8.1](#81-関数ポインタ-vs-メンバ関数ポインタ) |
+| `makeForm()` は if/elseif 連鎖を避ける | [Intern.cpp#L35-L55](cpp05/ex03/Intern.cpp#L35) | [§7](#7-ex03--intern-と-factory) / [§8.1](#81-関数ポインタ-vs-メンバ関数ポインタ) |
 | メモリリークがないこと | `catch (...)` で解放（[ex03/main.cpp#L12-L22](cpp05/ex03/main.cpp#L12)） | [§10](#10-検証手順と実際の出力) |
 
 > **注意**: evals.txt の Good dispatching 欄は *"array of pointers to **member** functions"* と書かれている。現在の実装は **static メンバ関数を指す通常の関数ポインタ**の配列であり、C++ の型としては非静的メンバ関数ポインタではない。この差は隠さず説明する方針で、詳細は [§8.1](#81-関数ポインタ-vs-メンバ関数ポインタ) に書いた。
@@ -145,7 +145,7 @@ Bureaucrat::Bureaucrat(const std::string &name, int grade) : _name(name)
 }
 ```
 
-境界値は [Bureaucrat.hpp#L14-L15](cpp05/ex00/Bureaucrat.hpp#L14) で `static const int HIGHEST_GRADE = 1; LOWEST_GRADE = 150;` としてある。マジックナンバーを 4 箇所（コンストラクタ 2、increment、decrement）に散らさないため。
+境界値は [Bureaucrat.hpp#L13-L14](cpp05/ex00/Bureaucrat.hpp#L13) で `static const int HIGHEST_GRADE = 1; LOWEST_GRADE = 150;` としてある。マジックナンバーを 4 箇所（コンストラクタ 2、increment、decrement）に散らさないため。
 
 grade 変更は**変更前**に検査する（[Bureaucrat.cpp#L47-L62](cpp05/ex00/Bureaucrat.cpp#L47)）。
 
@@ -191,7 +191,7 @@ const な名前、署名済みフラグ、const な署名 grade と実行 grade�
 役割分担がこの Exercise の全てである。
 
 ```cpp
-// Form.cpp#L52 — 条件を「判定」して throw するだけ。表示はしない
+// Form.cpp#L50 — 条件を「判定」して throw するだけ。表示はしない
 void Form::beSigned(const Bureaucrat& bureaucrat) {
     if (bureaucrat.getGrade() > _gradeToSign)
         throw GradeTooLowException();
@@ -236,7 +236,7 @@ sequenceDiagram
 - **循環参照は前方宣言で切る。** `Form.hpp` が `class Bureaucrat;`（[#L8](cpp05/ex01/Form.hpp#L8)）、`Bureaucrat.hpp` が `class Form;`（[#L8](cpp05/ex01/Bureaucrat.hpp#L8)）。ヘッダでは参照／ポインタとして名前しか要らないので不完全型で足り、実体を触る `.cpp` 側で本物を include する（[Form.cpp#L2](cpp05/ex01/Form.cpp#L2)）。ここを相互 include で書いて無限ループさせたのが最初の失敗だった。
 - **署名の判定は `>=` ではなく `>` で「拒否」を書く。** 「必要 grade **以下**なら許可」を裏返して「必要 grade より**大きい**なら拒否」と書くほうが、例外を投げる条件と式が一致して読みやすい。
 - 署名済みの Form にもう一度署名しても `_isSigned = true` のままで、エラーにはならない（冪等）。subject は再署名の扱いを指定していないため、状態遷移を単純に保つ側を選んだ。実出力の Test 7 がその挙動を示している。
-- `Form::operator=` も `_isSigned` だけをコピーする（[Form.cpp#L23-L28](cpp05/ex01/Form.cpp#L23)）。ex00 と同じ理屈で、name と必要 grade は const な「その書類の identity」だから。
+- `Form::operator=` も `_isSigned` だけをコピーする（[Form.cpp#L24-L29](cpp05/ex01/Form.cpp#L24)）。ex00 と同じ理屈で、name と必要 grade は const な「その書類の identity」だから。
 
 ---
 
@@ -301,9 +301,9 @@ flowchart TD
 
 - **`virtual ~AForm()` が必須。**（[AForm.hpp#L28](cpp05/ex02/AForm.hpp#L28)）ex03 で `AForm*` 経由の `delete` をするため。virtual でないと派生デストラクタが呼ばれず未定義動作になる。「基底のデストラクタは空だから要らない」は間違い、というのが CPP04 から持ち越した教訓。
 - **派生側の `executeAction()` は private で宣言している。**（[RobotomyRequestForm.hpp#L9](cpp05/ex02/RobotomyRequestForm.hpp#L9)）基底では protected、派生では private とアクセス指定が食い違うが、これは合法で意図どおり動く。**アクセスチェックは呼び出し式の静的な型（= 基底の宣言）に対して行われ、実際にどの関数へ飛ぶかは実行時の virtual dispatch で決まる**ため。この 2 段構えを理解したのが ex02 で一番時間を使ったところだった。結果として「派生を直接 `form.executeAction()` と呼ぶ」経路がさらに塞がれている。
-- **`FormNotSignedException` は subject 指定の 2 種類に加えた独自追加。**（[AForm.hpp#L47](cpp05/ex02/AForm.hpp#L47)）未署名と権限不足は原因が違うので、`e.what()` が同じ文言になるのを避けたかった。実出力の 1 行目と `LowGrade couldn't sign ...` の行で、メッセージが区別されているのが確認できる。
+- **`FormNotSignedException` は subject 指定の 2 種類に加えた独自追加。**（[AForm.hpp#L48](cpp05/ex02/AForm.hpp#L48)）未署名と権限不足は原因が違うので、`e.what()` が同じ文言になるのを避けたかった。実出力の 1 行目と `LowGrade couldn't sign ...` の行で、メッセージが区別されているのが確認できる。
 - **`std::srand()` は `main` で 1 回だけ呼ぶ。**（[ex02/main.cpp#L12](cpp05/ex02/main.cpp#L12)）`executeAction()` の中で毎回 seed すると、短時間に連続実行したとき `time(NULL)` が同じ値になり、同じ結果が並ぶ。seed は「プログラムの起動時の関心事」であって form の関心事ではない。
-- `std::ofstream` には `filename.c_str()` を渡す（[ShrubberyCreationForm.cpp#L61](cpp05/ex02/ShrubberyCreationForm.cpp#L61)）。`std::string` を直接受け取るコンストラクタは C++11 から。C++98 縛りを実感した箇所。
+- `std::ofstream` には `filename.c_str()` を渡す（[ShrubberyCreationForm.cpp#L32](cpp05/ex02/ShrubberyCreationForm.cpp#L32)）。`std::string` を直接受け取るコンストラクタは C++11 から。C++98 縛りを実感した箇所。
 
 ---
 
@@ -315,10 +315,10 @@ flowchart TD
 
 ### 実装
 
-名前と生成関数を対にしたテーブルを走査する（[Intern.cpp#L38-L52](cpp05/ex03/Intern.cpp#L38)）。
+名前と生成関数を対にしたテーブルを走査する（[Intern.cpp#L35-L55](cpp05/ex03/Intern.cpp#L35)）。
 
 ```cpp
-struct FormInfo {                                   // Intern.hpp#L10
+struct FormInfo {                                   // Intern.hpp#L9
     std::string name;
     AForm* (*creator)(const std::string& target);
 };
@@ -363,8 +363,8 @@ delete form;
 ### 学習メモ
 
 - **C++98 には `std::unique_ptr` がない。** だから「例外が飛ぶ経路でも必ず `delete` する」ことを手書きで保証する必要がある。`catch (...) { delete form; throw; }` という定型がそれで、C++11 以降なら `std::unique_ptr` 1 行で消える定型でもある。**RAII が何を自動化してくれているのかを、手で書いて理解した**のがこの Exercise の収穫だった。`delete NULL;` が安全なので、`form = NULL` 初期化と組み合わせれば生成失敗時も同じ経路で書ける。
-- **未知の名前のときは、エラー表示と throw の両方をしている。**（[Intern.cpp#L49-L51](cpp05/ex03/Intern.cpp#L49)）subject の要求は「明示的なエラーメッセージ」だけなので表示で足りるが、呼び出し側が `NULL` チェックを忘れて落ちるのを避けたくて例外も投げている。二重報告である点は自覚しており、[§8.2](#82-intern-の二重報告) に書いた。
-- `Intern` は状態を持たないので、コピーコンストラクタと代入演算子は `(void)other;` で引数を捨てるだけの実装になる（[Intern.cpp#L13-L20](cpp05/ex03/Intern.cpp#L13)）。OCF の要求を満たすためだけに存在するコードだが、`-Wunused-parameter` を通すために `(void)` キャストが要る。
+- **未知の名前のときは、エラー表示と throw の両方をしている。**（[Intern.cpp#L52-L54](cpp05/ex03/Intern.cpp#L52)）subject の要求は「明示的なエラーメッセージ」だけなので表示で足りるが、呼び出し側が `NULL` チェックを忘れて落ちるのを避けたくて例外も投げている。二重報告である点は自覚しており、[§8.2](#82-intern-の二重報告) に書いた。
+- `Intern` は状態を持たないので、コピーコンストラクタと代入演算子は `(void)other;` で引数を捨てるだけの実装になる（[Intern.cpp#L11-L18](cpp05/ex03/Intern.cpp#L11)）。OCF の要求を満たすためだけに存在するコードだが、`-Wunused-parameter` を通すために `(void)` キャストが要る。
 
 ---
 
@@ -374,7 +374,7 @@ delete form;
 
 ### 8.1 関数ポインタ vs メンバ関数ポインタ
 
-evals.txt の Good dispatching 欄は *"some kind of array of pointers to **member** functions"* と書いている。現在の実装は `static` メンバ関数を指す**通常の関数ポインタ**（[Intern.hpp#L12](cpp05/ex03/Intern.hpp#L12)）で、C++ の型としては `AForm* (Intern::*)(...)` ではない。
+evals.txt の Good dispatching 欄は *"some kind of array of pointers to **member** functions"* と書いている。現在の実装は `static` メンバ関数を指す**通常の関数ポインタ**（[Intern.hpp#L11](cpp05/ex03/Intern.hpp#L11)）で、C++ の型としては `AForm* (Intern::*)(...)` ではない。
 
 - subject 本文の必須要件は「過剰な if/else-if を避ける」であり、テーブル駆動はこれを満たす。
 - evals.txt の文言へ型まで厳密に一致しているとは主張しない。
