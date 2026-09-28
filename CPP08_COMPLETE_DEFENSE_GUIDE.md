@@ -197,7 +197,7 @@ void addRange(Iterator begin, Iterator end) {
 
 - **差を int で計算していた。** 旧版は `shortestSpan` / `longestSpan` が `int` を返し、`sorted[i + 1] - sorted[i]` を int のまま引いていた。INT_MIN と INT_MAX の 2 つを入れる [tests/cpp05_09/span_extreme.cpp](tests/cpp05_09/span_extreme.cpp) を旧版に当てると、最短・最長とも `-1` が出る（正しくは 4294967295）。**「差」は負にならないという性質を型で表す**ことで、オーバーフローの問題も一緒に消えた。
 - **`addRange` が 1 回しか読めないイテレータを壊していた。** 旧版は `std::distance(begin, end)` で個数を数えてから `insert(begin, end)` していた。`std::istream_iterator` で "10 20 30" を渡す [tests/cpp05_09/span_input.cpp](tests/cpp05_09/span_input.cpp) を旧版に当てると、`std::distance` の時点でストリームを読み切ってしまい、`insert` には何も残らない。Span は空のままで、`shortestSpan` が例外を投げてプログラムが止まる。現在の版は `10 20` を出す。**イテレータには「何回読めるか」という能力の違いがある**ことを、ここで初めて意識した。
-- **コンストラクタ・デストラクタ・`addNumber` がログを出していた。** 旧版は数を 1 つ追加するたびに 1 行出力していた。1 万個のテストでは 1 万行になる。課題の要求にない出力なので削除した。同時に、テスト用に足していた public メンバ（`size`・`maxSize`・`empty`・`full`・`display`）も削除した。課題が求めるインターフェースだけを残す、という判断である。
+- **コンストラクタ・デストラクタ・`addNumber` がログを出していた。** 旧版は数を 1 つ追加するたびに 1 行出力していた（`git show 80d365f^:cpp08/ex01/Span.cpp` の 38 行目）。課題の要求にない出力なので削除した。同時に、テスト用に足していた public メンバ（`size`・`maxSize`・`empty`・`full`・`display`）も削除した。課題が求めるインターフェースだけを残す、という判断である。
 
 ---
 
