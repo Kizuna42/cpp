@@ -28,18 +28,29 @@ public:
 	private:
 		std::string _message;
 	public:
+		InvalidExpressionException(void);
 		InvalidExpressionException(const std::string& message);
+		InvalidExpressionException(const InvalidExpressionException& other);
+		InvalidExpressionException& operator=(const InvalidExpressionException& other);
 		virtual ~InvalidExpressionException() throw();
 		virtual const char* what() const throw();
 	};
-	
+
 	class DivisionByZeroException : public std::exception {
 	public:
+		DivisionByZeroException(void);
+		DivisionByZeroException(const DivisionByZeroException& other);
+		DivisionByZeroException& operator=(const DivisionByZeroException& other);
+		virtual ~DivisionByZeroException() throw();
 		virtual const char* what() const throw();
 	};
-	
+
 	class InsufficientOperandsException : public std::exception {
 	public:
+		InsufficientOperandsException(void);
+		InsufficientOperandsException(const InsufficientOperandsException& other);
+		InsufficientOperandsException& operator=(const InsufficientOperandsException& other);
+		virtual ~InsufficientOperandsException() throw();
 		virtual const char* what() const throw();
 	};
 };
