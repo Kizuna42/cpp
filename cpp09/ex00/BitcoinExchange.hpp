@@ -29,7 +29,10 @@ public:
 	private:
 		std::string _message;
 	public:
+		FileException(void);
 		FileException(const std::string& message);
+		FileException(const FileException& other);
+		FileException& operator=(const FileException& other);
 		virtual ~FileException() throw();
 		virtual const char* what() const throw();
 	};
@@ -38,7 +41,10 @@ public:
 	private:
 		std::string _message;
 	public:
+		InvalidFormatException(void);
 		InvalidFormatException(const std::string& message);
+		InvalidFormatException(const InvalidFormatException& other);
+		InvalidFormatException& operator=(const InvalidFormatException& other);
 		virtual ~InvalidFormatException() throw();
 		virtual const char* what() const throw();
 	};
@@ -47,7 +53,10 @@ public:
 	private:
 		std::string _message;
 	public:
+		InvalidValueException(void);
 		InvalidValueException(const std::string& message);
+		InvalidValueException(const InvalidValueException& other);
+		InvalidValueException& operator=(const InvalidValueException& other);
 		virtual ~InvalidValueException() throw();
 		virtual const char* what() const throw();
 	};

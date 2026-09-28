@@ -1,6 +1,6 @@
 # CPP09 — 実装解説と学習記録
 
-> **対象**: `cpp09/ex00`〜`ex02`（Bitcoin Exchange / 逆ポーランド記法 / Ford-Johnson 法）
+> **対象**: `cpp09/ex00`〜`ex02`（Bitcoin Exchange / 逆ポーランド記法 / Ford-Johnson 法）。基準は公式 subject Version 3.3
 > **この文書の役割**: 実装を読む人のための解説書であり、同時に自分がどこで何を理解したかの学習記録である。
 > **提出手続き・リポジトリ同一性の確認**は [REVIEW_NOTES.md](REVIEW_NOTES.md) に分離してある。ここでは扱わない。
 
@@ -40,6 +40,10 @@ ex02 の Ford-Johnson:
         ペアにして勝者（大）と敗者（小）に分ける → 勝者だけを再帰で並べる
         → 主列 = b1 + 勝者 → 残りの敗者を Jacobsthal 順（b3 b2 b5 b4 b11..b6 ...）で、
           相手の勝者より前だけを二分探索して挿入 → 奇数の余りは主列全体を探索
+        重複した値も受け付ける（subject v3.3 の必須要件）
+
+クラスの形:
+        本体 3 つ（BitcoinExchange / RPN / PmergeMe）と入れ子の例外クラス 7 つが、すべて OCF の 4 つを明示
 ```
 
 ビルド条件は全 Exercise 共通で `c++ -Wall -Wextra -Werror -std=c++98`（[ex00/Makefile#L3-L4](cpp09/ex00/Makefile#L3)）。
@@ -48,11 +52,11 @@ ex02 の Ford-Johnson:
 
 ## 2. この課題の性質
 
-Module 09 は STL のコンテナを使って 3 つのプログラムを作る課題である。性質を決めているのは、各 Exercise の末尾に置かれた警告である。
+Module 09 は STL のコンテナを使って 3 つのプログラムを作る課題である。性質を決めているのは、モジュール全体に適用される次の規則である。
 
-> The container(s) you used in the previous exercise are forbidden here.
+> Once a container is used you cannot use it for the rest of the module.
 >
-> — 公式 subject, Exercise 01（[cpp09/subject.txt](cpp09/subject.txt)。Exercise 02 にも同じ趣旨の警告がある）
+> — 公式 subject Version 3.3, Chapter III（[cpp09/subject.txt](cpp09/subject.txt)。各 Exercise の末尾にも同じ趣旨の警告がある）
 
 つまり**どのコンテナを選ぶかが、3 つの Exercise をまたいだ設計判断になる**。EvalHub の評価表も各 Exercise で「なぜそのコンテナを選んだかを説明できなければ評価終了」「前の Exercise と同じコンテナなら評価終了」としており、ex02 では「Ford-Johnson 法がコンテナごとに実装されていること」と「その簡単な説明」を求める（このリポジトリには cpp09 の評価表の写しを置いていないため、EvalHub の cpp09 評価表に基づく）。さらに、評価中に segfault などで予期せず終了すると、その時点で 0 点になる。
 
@@ -70,7 +74,9 @@ subject の共通ルール（Chapter II）にある罰則。実装の良し悪�
 | `*printf()` / `*alloc()` / `free()` を使用 | 0 | 不使用 |
 | C++11 以降・Boost・その他外部ライブラリを使用 | 0 | 不使用（`-pedantic-errors` でも通る） |
 
-STL のコンテナとアルゴリズムは Module 08・09 で許可されている。Orthodox Canonical Form（Module 02〜09）とメモリリーク禁止は引き続き守る。`BitcoinExchange`・`RPN`・`PmergeMe` は 4 つの特殊メンバ関数をすべて明示している。
+STL のコンテナとアルゴリズムは Module 08・09 で許可されている。Orthodox Canonical Form（Module 02〜09）とメモリリーク禁止は引き続き守る。本体の `BitcoinExchange`・`RPN`・`PmergeMe` と、入れ子の例外クラス 7 つのすべてが、デフォルトコンストラクタ・コピーコンストラクタ・コピー代入演算子・デストラクタの 4 つを明示している（例外クラスの例: [PmergeMe.hpp#L45-L52](cpp09/ex02/PmergeMe.hpp#L45)）。
+
+Chapter III には、Makefile が `$(NAME)`・`all`・`clean`・`fclean`・`re` を持ち、`c++` と `-Wall -Wextra -Werror` を使い、再リンクしないことも定められている（[ex00/Makefile](cpp09/ex00/Makefile)。ex01・ex02 も同じ形）。
 
 ---
 
@@ -96,7 +102,7 @@ ex00 と ex01 で使っているのは map、stack、list だけである。`std
 
 処理は「data.csv を map に読み込む → 入力ファイルを 1 行ずつ検証する → レートを探して掛け算して表示する」の 3 段である。
 
-直前の日付の検索は次のとおり（[BitcoinExchange.cpp#L176-L190](cpp09/ex00/BitcoinExchange.cpp#L176)）。
+直前の日付の検索は次のとおり（[BitcoinExchange.cpp#L223-L237](cpp09/ex00/BitcoinExchange.cpp#L223)）。
 
 ```cpp
 double BitcoinExchange::getExchangeRate(const std::string& date) const {
@@ -116,7 +122,7 @@ double BitcoinExchange::getExchangeRate(const std::string& date) const {
 }
 ```
 
-入力の各行は、`" | "` の有無 → 日付 → 値の形式 → 値の範囲 の順に確かめ、どこかで引っかかればメッセージを出して `continue` する（[BitcoinExchange.cpp#L192-L257](cpp09/ex00/BitcoinExchange.cpp#L192)）。日付は長さ 10・区切りの `-`・数字・月 1〜12・うるう年を考慮した日数で検証する（[#L82-L125](cpp09/ex00/BitcoinExchange.cpp#L82)）。値は `std::istringstream` で double として読み、最後まで読み切れたか、NaN や無限大でないかを確かめる（[#L66-L76](cpp09/ex00/BitcoinExchange.cpp#L66)）。
+入力の各行は、`" | "` の有無 → 日付 → 値の形式 → 値の範囲 の順に確かめ、どこかで引っかかればメッセージを出して `continue` する（[BitcoinExchange.cpp#L239-L304](cpp09/ex00/BitcoinExchange.cpp#L239)）。日付は長さ 10・区切りの `-`・数字・月 1〜12・うるう年を考慮した日数で検証する（[#L129-L172](cpp09/ex00/BitcoinExchange.cpp#L129)）。値は `std::istringstream` で double として読み、最後まで読み切れたか、NaN や無限大でないかを確かめる（[#L113-L123](cpp09/ex00/BitcoinExchange.cpp#L113)）。
 
 main は引数がちょうど 1 つでなければ `Error: could not open file.` を出し、DB と入力を処理する（[main.cpp#L6-L25](cpp09/ex00/main.cpp#L6)）。DB は `"data.csv"` をカレントディレクトリから開く（[main.cpp#L14](cpp09/ex00/main.cpp#L14)）。
 
@@ -129,11 +135,11 @@ DB:   … 2011-01-01 (0.3) │ 2011-01-04 (0.3) │ 2011-01-07 (0.32) …
 入力  2011-01-03 → lower_bound = 2011-01-04 → --it = 2011-01-01 → 3 × 0.3 = 0.9
 ```
 
-**入力ファイルのエラーでは止まらず、DB のエラーでは止まる。** 入力の不正な行は 1 行の問題なので、表示して次の行に進む。評価表も「ファイル全体を処理する前に止まってはならない」としている。一方 DB（data.csv）は計算の前提なので、日付やレートが壊れていれば例外で終了する（[#L158-L170](cpp09/ex00/BitcoinExchange.cpp#L158)）。続けても正しい結果が出ないからである。
+**入力ファイルのエラーでは止まらず、DB のエラーでは止まる。** 入力の不正な行は 1 行の問題なので、表示して次の行に進む。評価表も「ファイル全体を処理する前に止まってはならない」としている。一方 DB（data.csv）は計算の前提なので、日付やレートが壊れていれば例外で終了する（[#L205-L217](cpp09/ex00/BitcoinExchange.cpp#L205)）。続けても正しい結果が出ないからである。
 
-**表示の精度は `setprecision(15)`** にした（[#L249-L250](cpp09/ex00/BitcoinExchange.cpp#L249)）。double で意味のある桁数（`digits10`）である。既定の 6 桁だと `1000 × 47115.93` が `4.71159e+07` のような指数表記になり、17 桁にすると `1.2 × 0.3` が `0.35999999999999999` と表示される。15 桁ならそれぞれ `47115930`・`0.36` になる。
+**表示の精度は `setprecision(15)`** にした（[#L296-L297](cpp09/ex00/BitcoinExchange.cpp#L296)）。double で意味のある桁数（`digits10`）である。既定の 6 桁だと `1000 × 47115.93` が `4.71159e+07` のような指数表記になり、17 桁にすると `1.2 × 0.3` が `0.35999999999999999` と表示される。15 桁ならそれぞれ `47115930`・`0.36` になる。
 
-**行末の `\r` を取り除いている**（[#L202-L203](cpp09/ex00/BitcoinExchange.cpp#L202)）。Windows 形式の改行のファイルを渡されても、見出しと値を正しく読める。
+**行末の `\r` を取り除いている**（[#L249-L250](cpp09/ex00/BitcoinExchange.cpp#L249)）。Windows 形式の改行のファイルを渡されても、見出しと値を正しく読める。
 
 ### 学習メモ
 
@@ -154,7 +160,7 @@ DB:   … 2011-01-01 (0.3) │ 2011-01-04 (0.3) │ 2011-01-07 (0.32) …
 
 ### 実装
 
-トークンを空白で区切り、数なら積み、演算子なら 2 つ取り出して計算する（[RPN.cpp#L78-L96](cpp09/ex01/RPN.cpp#L78)）。
+トークンを空白で区切り、数なら積み、演算子なら 2 つ取り出して計算する（[RPN.cpp#L130-L148](cpp09/ex01/RPN.cpp#L130)）。
 
 ```cpp
 void RPN::processToken(const std::string& token) {
@@ -178,7 +184,7 @@ void RPN::processToken(const std::string& token) {
 }
 ```
 
-数として受け付けるのは数字 1 文字だけである（[RPN.cpp#L45-L48](cpp09/ex01/RPN.cpp#L45)）。四則演算は double で計算して int の範囲を超えたら例外にし、割り算は 0 除算と `INT_MIN / -1` を弾く（[#L50-L76](cpp09/ex01/RPN.cpp#L50)）。式の終わりに積んである数がちょうど 1 つでなければ例外にする（[#L112-L114](cpp09/ex01/RPN.cpp#L112)）。main はどの例外も標準エラーへの `Error` にまとめる（[ex01/main.cpp#L11-L19](cpp09/ex01/main.cpp#L11)）。
+数として受け付けるのは数字 1 文字だけである（[RPN.cpp#L97-L100](cpp09/ex01/RPN.cpp#L97)）。四則演算は double で計算して int の範囲を超えたら例外にし、割り算は 0 除算と `INT_MIN / -1` を弾く（[#L102-L128](cpp09/ex01/RPN.cpp#L102)）。式の終わりに積んである数がちょうど 1 つでなければ例外にする（[#L164-L166](cpp09/ex01/RPN.cpp#L164)）。main はどの例外も標準エラーへの `Error` にまとめる（[ex01/main.cpp#L11-L19](cpp09/ex01/main.cpp#L11)）。
 
 ### なぜこの設計か
 
@@ -200,7 +206,7 @@ void RPN::processToken(const std::string& token) {
 
 ### subject の要求
 
-プログラム名は `PmergeMe`。正の整数の列を引数で受け取り、**merge-insert sort（Ford-Johnson 法）**で並べ替える。違うコンテナを最低 2 つ使い、コンテナごとにアルゴリズムを実装することが強く推奨されている。最低 3000 個を扱えること。表示は 4 行で、並べ替え前、並べ替え後、1 つ目のコンテナの時間、2 つ目のコンテナの時間。時間の精度は 2 つのコンテナの差がはっきり分かるものにする。重複の扱いは自由。
+プログラム名は `PmergeMe`。正の整数の列を引数で受け取り、**merge-insert sort（Ford-Johnson 法）**で並べ替える。違うコンテナを最低 2 つ使い、コンテナごとにアルゴリズムを実装することが強く推奨されている。**重複した値を含めて**最低 3000 個を扱えること（Version 3.3 で明記）。エラーは標準エラーに出す（subject の例: `./PmergeMe "-1" "2"` → `Error`）。表示は 4 行で、並べ替え前、並べ替え後、1 つ目のコンテナの時間、2 つ目のコンテナの時間。時間の精度は 2 つのコンテナの差がはっきり分かるものにし、並べ替えだけでなくデータ管理の時間も含める。
 
 ### 実装
 
@@ -254,6 +260,7 @@ b3 b2 | b5 b4 | b11 b10 … b6 | b21 … b12 | …
 
 - **旧版は Ford-Johnson 法ではなかった。** 2026-07-21 の整理（`80d365f`）より前の PmergeMe は、10 個以下なら挿入ソート、それより多ければ半分に分けてマージする、マージソートと挿入ソートの組み合わせだった（`git show 80d365f^:cpp09/ex02/PmergeMe.cpp` の 113〜127 行目）。ペア分けも Jacobsthal 順の挿入もない。旧版にも同じ比較回数の計測を当てると、各 n について 3000 通りの並びの最悪値で、n = 5 で 10 回、n = 10 で 44 回、n = 15 で 62 回だった（Ford-Johnson の理論値はそれぞれ 7・22・42）。**"merge-insert" という名前を「マージソート＋挿入ソート」と読んでいた**のが原因で、評価表が求める Ford-Johnson 法とは別物だった。手順を 1 つずつ書き起こし、比較回数が理論値と一致するところまで確かめて作り直した。
 - **例外クラスの実装がヘッダにあった。** 旧 `PmergeMe.hpp` でも、2 つの例外クラスの `what()` などがクラス定義の中に書かれていた（同ヘッダの 60〜71 行目）。btc・RPN と同じく .cpp に移した。3 つの Exercise すべてで同じ誤りをしていたことになり、**「ヘッダにあるものはすべてテンプレートか」を最後に一覧で確かめる**習慣はここから来ている。
+- **例外クラスも OCF の対象だった。** 2026-09-28 の最終監査で、評価表の ex02 にある「インターフェース以外のクラスが OCF でなければ採点しない」に文字どおり当たるのが、本体ではなく入れ子の例外クラスだと分かった。`what()` しか書いていないクラスがあり、コピーや代入はコンパイラ任せだった。3 つの Exercise の例外クラス 7 つすべてに 4 つを明示し、コピーでは基底の `std::exception` も写すようにした。変更の前後で、48 通りの入力に対する標準出力・標準エラー・終了コードが完全に一致することを確かめてある。**「クラス」と書かれていたら、入れ子のクラスも数える**。
 
 ---
 
@@ -265,26 +272,19 @@ b3 b2 | b5 b4 | b11 b10 … b6 | b21 … b12 | …
 
 main は DB を `"data.csv"` としてカレントディレクトリから開く（[main.cpp#L14](cpp09/ex00/main.cpp#L14)）。リポジトリの直下などから `cpp09/ex00/btc input.txt` のように実行すると、DB が開けずに `Error: could not open file.` になる。評価では `cd cpp09/ex00` してから実行する。
 
-### 8.2 例外クラスは OCF を明示していない
-
-評価表は ex02 で「インターフェース以外のクラスが OCF でなければ採点しない」としている。`BitcoinExchange`・`RPN`・`PmergeMe` 本体は 4 つを明示しているが、例外クラスは `what()`（クラスによってはメッセージ付きのコンストラクタとデストラクタも）しか書いておらず、デフォルトコンストラクタ・コピー・代入はコンパイラが生成するものに任せている（例: [PmergeMe.hpp#L45-L48](cpp09/ex02/PmergeMe.hpp#L45)）。
-
-- メンバは持たないか `std::string` だけなので、生成されるコピー・代入で正しく動く。
-- 厳密に読めば対象になりうる。明示するなら 4 つを宣言して .cpp に定義するだけで済む（[§11](#11-評価中の改修依頼に備える)）。
-
-### 8.3 btc に空のファイルを渡すと何も表示しない
+### 8.2 btc に空のファイルを渡すと何も表示しない
 
 処理する行がないので、何も出さずに終了コード 0 で終わる。評価表は「空のファイルでも止まらずに動くこと」を見るので問題はないが、エラーを表示してほしいと言われたら [§11](#11-評価中の改修依頼に備える) の方法で足せる。
 
-### 8.4 PmergeMe の時間の小数部は常に 0
+### 8.3 PmergeMe の時間の小数部は常に 0
 
 `gettimeofday` はマイクロ秒単位なので、`std::setprecision(5)` で表示した小数部は常に `.00000` になる（[PmergeMe.cpp#L338-L344](cpp09/ex02/PmergeMe.cpp#L338)）。2 つのコンテナの差は整数部分ではっきり見えるので、subject の「差が分かる精度」は満たしていると判断した。時間には文字列の変換とコンテナへの格納も含まれる。
 
-### 8.5 評価表の Linux 用コマンドは 1000 個しか出さない
+### 8.4 評価表の Linux 用コマンドは 1000 個しか出さない
 
-評価表の Linux 用コマンド `shuf -i 1-1000 -n 3000` は、1〜1000 から重複なしで選ぶので 1000 個しか出ない。表示が「1000 elements」になるのは正しい動作である。3000 個で試すなら `shuf -i 1-100000 -n 3000` を使う。macOS 用の `jot -r 3000 1 1000` は 3000 個出るが、必ず重複を含む。本実装は重複を受け付けて正しく並べる。
+評価表の Linux 用コマンド `shuf -i 1-1000 -n 3000` は、1〜1000 から重複なしで選ぶので 1000 個しか出ない。表示が「1000 elements」になるのは正しい動作である。3000 個で試すなら `shuf -i 1-100000 -n 3000` を使う。macOS 用の `jot -r 3000 1 1000` は 3000 個出るが、必ず重複を含む。subject（Version 3.3）は重複を含む入力の処理を求めており、本実装は重複を受け付けて正しく並べる。
 
-### 8.6 Before 行は受け取った文字列のまま表示する
+### 8.5 Before 行は受け取った文字列のまま表示する
 
 `+5` や `007` は Before ではそのまま、After では `5`・`7` と表示される（[PmergeMe.cpp#L311-L319](cpp09/ex02/PmergeMe.cpp#L311)）。先頭の `+` と先頭の 0 は正の整数として受け付けている。
 
@@ -343,7 +343,10 @@ vector は連続メモリで添字アクセスがアドレス計算 1 回で済�
 subject が汎用の関数を避けてコンテナごとに実装するよう強く推奨しているから。評価表も「コンテナごとに Ford-Johnson 法が使われているか」を見る。
 
 **Q. 重複した数は。**
-subject で扱いは自由。受け付けてそのまま並べる。macOS 用の評価コマンドは重複を含むが、正しく並ぶことを確認した。
+subject（Version 3.3）が「重複した値を含めて 3000 個以上」を扱うことを求めている。受け付けてそのまま並べる。二分探索が同じ値の後ろに入れる形なので、重複があっても正しく並ぶ。macOS 用の評価コマンドは必ず重複を含むが、正しく並ぶことを確認した。
+
+**Q. 例外クラスも OCF になっているか。**
+なっている。3 つの Exercise の例外クラス 7 つすべてが、デフォルトコンストラクタ・コピーコンストラクタ・コピー代入演算子・デストラクタを明示している。評価表の ex02 は「インターフェース以外のクラス」を対象にしており、入れ子の例外クラスも含まれると読んだ。コピーでは基底の `std::exception` とメッセージを写し、デストラクタは `std::exception` に合わせて `throw()` を付けている。
 
 **Q. 不正な入力は。**
 負の数、0、数字以外、int を超える数、空の文字列は、何も表示せずに標準エラーへ `Error` を出す。
@@ -352,7 +355,7 @@ subject で扱いは自由。受け付けてそのまま並べる。macOS 用の
 
 ## 10. 検証手順と実際の出力
 
-以下は `cpp09/` をリポジトリ外へコピーしてビルドした実際の出力である。環境は macOS / Apple clang 21（2026-09-24、2026-09-28 にコミット済みのコードで再確認）と Ubuntu 24.04（Docker）/ g++ 13.3.0・clang++ / Valgrind 3.22.0（2026-09-24）。cpp09 のソースは commit `80d365f` 以降変更されていない。
+以下は `cpp09/` をリポジトリ外へコピーしてビルドした実際の出力である。環境は macOS / Apple clang 21 と Ubuntu 24.04（Docker）/ g++ 13.3.0・clang++ / Valgrind 3.22.0。2026-09-28 に例外クラスへ OCF を明示した後のコードで、すべて取り直した。変更の前後で、下の入力を含む 48 通りの実行の標準出力・標準エラー・終了コードが完全に一致した（PmergeMe の時間の数値だけは実行ごとに変わるので比較から除いた）。[scripts/verify_cpp05_09.sh](scripts/verify_cpp05_09.sh) も 176 件合格・失敗 0（macOS では valgrind の 1 件を skip）。
 
 ### ビルド
 
@@ -455,13 +458,11 @@ subject の最終章に、評価中に軽微な改修を求められることが
 
 | 依頼されそうなこと | 触る場所 | やること |
 |---|---|---|
-| btc で空のファイルにエラーを出す | [BitcoinExchange.cpp#L194-L196](cpp09/ex00/BitcoinExchange.cpp#L194) の直後 | `if (file.peek() == std::ifstream::traits_type::eof())` なら `Error: empty file.` を出して return |
-| RPN で 2 桁以上の数を受け付ける | [RPN.cpp#L45-L48](cpp09/ex01/RPN.cpp#L45) と [#L80](cpp09/ex01/RPN.cpp#L80) | 全文字が数字（最大 9 桁）なら数とし、`std::atoi(token.c_str())` で積む。`<cstdlib>` を include |
-| RPN に `%` を足す | [RPN.cpp#L41-L43](cpp09/ex01/RPN.cpp#L41) と [#L50-L76](cpp09/ex01/RPN.cpp#L50) | `isOperator` に `"%"` を足し、`performOperation` に 0 除算の確認つきの分岐を足す |
-| PmergeMe で重複を拒否する | [PmergeMe.cpp#L253-L267](cpp09/ex02/PmergeMe.cpp#L253) | 検証ループの後で int に変換し、二重ループで同じ値があれば例外。map・list・stack は前の Exercise で使っているので使わない |
+| btc で空のファイルにエラーを出す | [BitcoinExchange.cpp#L241-L243](cpp09/ex00/BitcoinExchange.cpp#L241) の直後 | `if (file.peek() == std::ifstream::traits_type::eof())` なら `Error: empty file.` を出して return |
+| RPN で 2 桁以上の数を受け付ける | [RPN.cpp#L97-L100](cpp09/ex01/RPN.cpp#L97) と [#L132](cpp09/ex01/RPN.cpp#L132) | 全文字が数字（最大 9 桁）なら数とし、`std::atoi(token.c_str())` で積む。`<cstdlib>` を include |
+| RPN に `%` を足す | [RPN.cpp#L93-L95](cpp09/ex01/RPN.cpp#L93) と [#L102-L128](cpp09/ex01/RPN.cpp#L102) | `isOperator` に `"%"` を足し、`performOperation` に 0 除算の確認つきの分岐を足す |
 | PmergeMe の長い列を省略表示する | [PmergeMe.cpp#L311-L319](cpp09/ex02/PmergeMe.cpp#L311) | 先頭 5 個だけ出し、残りがあれば ` [...]` を足す |
 | 時間を std::clock で計る | [PmergeMe.cpp#L269-L289](cpp09/ex02/PmergeMe.cpp#L269) と deque 版 | `std::clock()` の差 × 1000000 / `CLOCKS_PER_SEC`。`<ctime>` を include |
-| 例外クラスを OCF にする | [PmergeMe.hpp#L45-L48](cpp09/ex02/PmergeMe.hpp#L45) と PmergeMe.cpp | デフォルトコンストラクタ・コピーコンストラクタ・代入・`virtual ~X() throw()` を宣言し、コピーは `std::exception(other)`、代入は `std::exception::operator=(other)` に任せる |
 
 ---
 
@@ -482,12 +483,14 @@ subject の最終章に、評価中に軽微な改修を求められることが
 | 挿入の順番は先頭からでよい | Jacobsthal 順にすることで、二分探索の範囲が 2^k − 1 個に収まり比較が無駄にならない |
 | Linux の評価コマンドで 3000 個並ぶ | `shuf -i 1-1000 -n 3000` は 1000 個しか出さない |
 | 例外クラスの実装はヘッダに書いてもよい | テンプレートではないので、ヘッダ実装の 0 点条件に当たる |
+| 例外クラスは OCF の対象外 | 評価表の ex02 は「インターフェース以外のクラス」を対象にしている。入れ子の例外クラスにも 4 つを明示する |
+| 重複の扱いは自由 | 古い subject の記述。Version 3.3 は重複を含む 3000 個以上の処理を求めている |
 
 ---
 
 ## 13. 関連資料
 
-- [cpp09/subject.txt](cpp09/subject.txt) — 課題原文の写し（Exercise 以降）
+- [cpp09/subject.txt](cpp09/subject.txt) — 課題原文の写し（Version 3.3。Chapter IV のみ要約）
 - [tests/cpp05_09/btc_edge.txt](tests/cpp05_09/btc_edge.txt) — btc の境界値の入力
 - [REVIEW_NOTES.md](REVIEW_NOTES.md) — CPP05〜09 横断の防衛ノートと提出前チェック（EvalHub の `input.csv` での確認記録を含む）
 - [COMPREHENSIVE_EVALUATION.md](COMPREHENSIVE_EVALUATION.md) — 監査レポートと provenance

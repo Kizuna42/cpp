@@ -20,7 +20,23 @@ RPN& RPN::operator=(const RPN& other) {
 RPN::~RPN(void) {
 }
 
+RPN::InvalidExpressionException::InvalidExpressionException(void) : _message("Invalid expression") {
+}
+
 RPN::InvalidExpressionException::InvalidExpressionException(const std::string& message) : _message(message) {
+}
+
+RPN::InvalidExpressionException::InvalidExpressionException(const InvalidExpressionException& other)
+	: std::exception(other), _message(other._message) {
+}
+
+RPN::InvalidExpressionException& RPN::InvalidExpressionException::operator=(
+	const InvalidExpressionException& other) {
+	if (this != &other) {
+		std::exception::operator=(other);
+		_message = other._message;
+	}
+	return *this;
 }
 
 RPN::InvalidExpressionException::~InvalidExpressionException() throw() {
@@ -30,8 +46,44 @@ const char* RPN::InvalidExpressionException::what() const throw() {
 	return _message.c_str();
 }
 
+RPN::DivisionByZeroException::DivisionByZeroException(void) {
+}
+
+RPN::DivisionByZeroException::DivisionByZeroException(const DivisionByZeroException& other)
+	: std::exception(other) {
+}
+
+RPN::DivisionByZeroException& RPN::DivisionByZeroException::operator=(
+	const DivisionByZeroException& other) {
+	if (this != &other) {
+		std::exception::operator=(other);
+	}
+	return *this;
+}
+
+RPN::DivisionByZeroException::~DivisionByZeroException() throw() {
+}
+
 const char* RPN::DivisionByZeroException::what() const throw() {
 	return "Division by zero";
+}
+
+RPN::InsufficientOperandsException::InsufficientOperandsException(void) {
+}
+
+RPN::InsufficientOperandsException::InsufficientOperandsException(const InsufficientOperandsException& other)
+	: std::exception(other) {
+}
+
+RPN::InsufficientOperandsException& RPN::InsufficientOperandsException::operator=(
+	const InsufficientOperandsException& other) {
+	if (this != &other) {
+		std::exception::operator=(other);
+	}
+	return *this;
+}
+
+RPN::InsufficientOperandsException::~InsufficientOperandsException() throw() {
 }
 
 const char* RPN::InsufficientOperandsException::what() const throw() {

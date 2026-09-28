@@ -24,7 +24,22 @@ BitcoinExchange& BitcoinExchange::operator=(const BitcoinExchange& other) {
 BitcoinExchange::~BitcoinExchange(void) {
 }
 
+BitcoinExchange::FileException::FileException(void) : _message("Could not open file") {
+}
+
 BitcoinExchange::FileException::FileException(const std::string& message) : _message(message) {
+}
+
+BitcoinExchange::FileException::FileException(const FileException& other)
+	: std::exception(other), _message(other._message) {
+}
+
+BitcoinExchange::FileException& BitcoinExchange::FileException::operator=(const FileException& other) {
+	if (this != &other) {
+		std::exception::operator=(other);
+		_message = other._message;
+	}
+	return *this;
 }
 
 BitcoinExchange::FileException::~FileException() throw() {
@@ -34,7 +49,23 @@ const char* BitcoinExchange::FileException::what() const throw() {
 	return _message.c_str();
 }
 
+BitcoinExchange::InvalidFormatException::InvalidFormatException(void) : _message("Invalid format") {
+}
+
 BitcoinExchange::InvalidFormatException::InvalidFormatException(const std::string& message) : _message(message) {
+}
+
+BitcoinExchange::InvalidFormatException::InvalidFormatException(const InvalidFormatException& other)
+	: std::exception(other), _message(other._message) {
+}
+
+BitcoinExchange::InvalidFormatException& BitcoinExchange::InvalidFormatException::operator=(
+	const InvalidFormatException& other) {
+	if (this != &other) {
+		std::exception::operator=(other);
+		_message = other._message;
+	}
+	return *this;
 }
 
 BitcoinExchange::InvalidFormatException::~InvalidFormatException() throw() {
@@ -44,7 +75,23 @@ const char* BitcoinExchange::InvalidFormatException::what() const throw() {
 	return _message.c_str();
 }
 
+BitcoinExchange::InvalidValueException::InvalidValueException(void) : _message("Invalid value") {
+}
+
 BitcoinExchange::InvalidValueException::InvalidValueException(const std::string& message) : _message(message) {
+}
+
+BitcoinExchange::InvalidValueException::InvalidValueException(const InvalidValueException& other)
+	: std::exception(other), _message(other._message) {
+}
+
+BitcoinExchange::InvalidValueException& BitcoinExchange::InvalidValueException::operator=(
+	const InvalidValueException& other) {
+	if (this != &other) {
+		std::exception::operator=(other);
+		_message = other._message;
+	}
+	return *this;
 }
 
 BitcoinExchange::InvalidValueException::~InvalidValueException() throw() {

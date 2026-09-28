@@ -44,6 +44,10 @@ public:
 
 	class InvalidInputException : public std::exception {
 	public:
+		InvalidInputException(void);
+		InvalidInputException(const InvalidInputException& other);
+		InvalidInputException& operator=(const InvalidInputException& other);
+		virtual ~InvalidInputException() throw();
 		virtual const char* what() const throw();
 	};
 };

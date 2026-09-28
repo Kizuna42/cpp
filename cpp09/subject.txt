@@ -1,12 +1,96 @@
-Based on the provided PDF file (Subject for C++ Module 09), here is the accurate transcription of the exercises and submission guidelines.
+Transcription of the official PDF "C++ - Module 09 / STL" (Version 3.3, 17 pages).
+
+Chapters I through III and V through VIII are transcribed below. Chapter IV
+("AI Instructions") states 42's position on the use of AI during the Common
+Core; it carries no technical requirement for the exercises and is summarised
+rather than transcribed.
+
+-----
+
+### Chapter I
+
+### Introduction
+
+  * C++ is a general-purpose programming language created by Bjarne Stroustrup as an extension of the C programming language, or "C with Classes".
+  * The goal of these modules is to introduce you to **Object-Oriented Programming**. This will be the starting point of your C++ journey.
+  * Because this is a complex language, and in order to keep things simple, your code will comply with the **C++98 standard**.
+  * Modern C++ is way different in a lot of aspects. Becoming a proficient C++ developer beyond the 42 Common Core is up to you.
+
+-----
+
+### Chapter II
+
+### General rules
+
+**Compiling**
+
+  * Compile your code with `c++` and the flags `-Wall -Wextra -Werror`.
+  * Your code should still compile if you add the flag `-std=c++98`.
+
+**Formatting and naming conventions**
+
+  * The exercise directories will be named this way: `ex00`, `ex01`, ... , `exn`.
+  * Name your files, classes, functions, member functions and attributes as required in the guidelines.
+  * Write class names in **UpperCamelCase** format. Files containing class code will always be named according to the class name. For instance: `ClassName.hpp`/`ClassName.h`, `ClassName.cpp`, or `ClassName.tpp`.
+  * Unless specified otherwise, every output message must end with a newline character and be displayed to the standard output.
+  * *Goodbye Norminette!* No coding style is enforced in the C++ modules. But keep in mind that code your peer evaluators can't understand is code they can't grade.
+
+**Allowed/Forbidden**
+
+  * You are allowed to use almost everything from the standard library.
+  * You can't use any other external library. C++11 (and derived forms) and Boost libraries are forbidden. The functions `*printf()`, `*alloc()` and `free()` are forbidden too. If you use them, your grade will be 0.
+  * Unless explicitly stated otherwise, the `using namespace <ns_name>` and `friend` keywords are forbidden. Otherwise, your grade will be -42.
+  * **You are allowed to use the STL only in Modules 08 and 09.** That means: no Containers (vector/list/map, and so forth) and no Algorithms (anything that requires including the `<algorithm>` header) until then. Otherwise, your grade will be -42.
+
+**A few design requirements**
+
+  * When you allocate memory (by using the `new` keyword), you must avoid **memory leaks**.
+  * From Module 02 to Module 09, your classes must be designed in the **Orthodox Canonical Form, except when explicitly stated otherwise**.
+  * Any function implementation put in a header file (except for function templates) means 0 to the exercise.
+  * You should be able to use each of your headers independently from others. Thus, they must include all the dependencies they need. However, you must avoid the problem of double inclusion by adding **include guards**. Otherwise, your grade will be 0.
+
+**Read me**
+
+  * You can add some additional files if you need to (i.e., to split your code), as long as you turn in the mandatory files.
+  * Sometimes, the guidelines of an exercise look short but the examples can show requirements that are not explicitly written in the instructions.
+  * Read each module completely before starting.
+  * Regarding the Makefile for C++ projects, the same rules as in C apply (see the Norm chapter about the Makefile).
+
+-----
+
+### Chapter III
+
+### Module-specific rules
+
+  * It is mandatory to use the standard containers to perform each exercise in this module.
+  * Once a container is used you cannot use it for the rest of the module.
+  * It is advisable to read the subject in its entirety before doing the exercises.
+  * You must use at least one container for each exercise with the exception of exercise 02 which requires the use of two containers.
+  * You must submit a `Makefile` for each program which will compile your source files to the required output with the flags `-Wall`, `-Wextra` and `-Werror`.
+  * You must use `c++`, and your Makefile must not relink.
+  * Your `Makefile` must at least contain the rules `$(NAME)`, `all`, `clean`, `fclean` and `re`.
+
+-----
+
+### Chapter IV
+
+### AI Instructions (summary)
+
+The chapter asks learners to build foundations through their own reasoning and
+peer learning, to reason before turning to AI, not to ask AI for direct
+answers, and to be able to explain their own work during peer evaluation and
+exams (where AI is not available). It contains no technical requirement for
+the exercises.
+
+-----
 
 ### Chapter V
 
 ### Exercise 00: Bitcoin Exchange
 
-  * **Turn-in directory:** `ex00/`
-  * **Files to turn in:** `Makefile, main.cpp, BitcoinExchange.{cpp, hpp}`
-  * **Forbidden functions:** None
+  * **Directory:** `ex00/`
+  * **Files to Submit:** `Makefile, main.cpp, BitcoinExchange.{cpp, hpp}`
+  * **Forbidden:** None
 
 **Instructions:**
 
@@ -19,14 +103,29 @@ Based on the provided PDF file (Subject for C++ Module 09), here is the accurate
       * Each line in this file must use the following format: `"date | value"`.
       * A valid date will always be in the following format: `Year-Month-Day`.
       * A valid value must be either a float or a positive integer, between 0 and 1000.
-  * You must use at least one container in your code to validate this exercise.
-  * [cite_start]You should handle possible errors with an appropriate error message. [cite: 1440-1452]
+  * You must use at least one container in your code to validate this exercise. You should handle possible errors with an appropriate error message.
+
+**Example input file:**
+
+```
+$> head input.txt
+date | value
+2011-01-03 | 3
+2011-01-03 | 2
+2011-01-03 | 1
+2011-01-03 | 1.2
+2011-01-09 | 1
+2012-01-11 | -1
+2001-42-42
+2012-01-11 | 1
+2012-01-11 | 2147483648
+```
 
 **Program Behavior:**
 
   * Your program will use the value in your input file.
   * Your program should display on the standard output the result of the value multiplied by the exchange rate according to the date indicated in your database.
-  * If the date used in the input does not exist in your DB then you must use the closest date contained in your DB. [cite_start]**Be careful to use the lower date and not the upper one.** [cite: 1468-1473]
+  * If the date used in the input does not exist in your DB then you must use the closest date contained in your DB. **Be careful to use the lower date and not the upper one.**
 
 **Example Usage:**
 
@@ -45,7 +144,7 @@ Error: bad input => 2001-42-42
 Error: too large a number.
 ```
 
-  * [cite_start]**Warning:** The container(s) you use to validate this exercise will no longer be usable for the rest of this module. [cite: 1475-1488]
+  * **Warning:** The container(s) you use to validate this exercise will no longer be usable for the rest of this module.
 
 -----
 
@@ -53,9 +152,9 @@ Error: too large a number.
 
 ### Exercise 01: Reverse Polish Notation
 
-  * **Turn-in directory:** `ex01/`
-  * **Files to turn in:** `Makefile, main.cpp, RPN.{cpp, hpp}`
-  * **Forbidden functions:** None
+  * **Directory:** `ex01/`
+  * **Files to Submit:** `Makefile, main.cpp, RPN.{cpp, hpp}`
+  * **Forbidden:** None
 
 **Instructions:**
 
@@ -67,7 +166,7 @@ Error: too large a number.
       * If an error occurs during the execution of the program an error message should be displayed on the standard error.
       * Your program must be able to handle operations with these tokens: `"+ - / *"`.
   * You must use at least one container in your code to validate this exercise.
-  * [cite_start]You don't need to handle brackets or decimal numbers. [cite: 1497-1508]
+  * You don't need to handle brackets or decimal numbers.
 
 **Example Usage:**
 
@@ -82,7 +181,7 @@ $> ./RPN "(1 + 1)"
 Error
 ```
 
-  * **Warning:** The container(s) you used in the previous exercise are forbidden here. [cite_start]The container(s) you used to validate this exercise will not be usable for the rest of this module. [cite: 1510-1521]
+  * **Warning:** The container(s) you used in the previous exercise are forbidden here. The container(s) you used to validate this exercise will not be usable for the rest of this module.
 
 -----
 
@@ -90,49 +189,52 @@ Error
 
 ### Exercise 02: PmergeMe
 
-  * **Turn-in directory:** `ex02/`
-  * **Files to turn in:** `Makefile, main.cpp, PmergeMe.{cpp, hpp}`
-  * **Forbidden functions:** None
+  * **Directory:** `ex02/`
+  * **Files to Submit:** `Makefile, main.cpp, PmergeMe.{cpp, hpp}`
+  * **Forbidden:** None
 
 **Instructions:**
 
   * You must create a program with these constraints:
       * The name of the program is `PmergeMe`.
       * Your program must be able to use a positive integer sequence as an argument.
-      * Your program must use the merge-insert sort algorithm to sort the positive integer sequence. (To clarify, yes, you need to use the Ford-Johnson algorithm.)
-      * If an error occurs during program execution, an error message should be displayed on the standard error.
-  * You must use at least two different containers in your code to validate this exercise.
-  * Your program must be able to handle at least 3000 different integers.
-  * [cite_start]It is strongly advised to implement your algorithm for each container and thus to avoid using a generic function. [cite: 1530-1542]
+      * Your program must use the merge-insert sort algorithm to sort the positive integer sequence.
+  * To clarify, yes, you need to use the Ford-Johnson algorithm. (source: Art Of Computer Programming, Vol.3. Merge Insertion, Page 184.)
+  * If an error occurs during program execution, an error message should be displayed on the standard error.
+  * You must use at least two different containers in your code to validate this exercise. Your program must be able to handle at least 3000 integers, **duplicate values included**.
+  * It is strongly advised to implement your algorithm for each container and thus to avoid using a generic function.
 
-**Display Requirements:**
+**Display Requirements (line by line, on the standard output):**
 
   * On the first line you must display an explicit text followed by the unsorted positive integer sequence.
   * On the second line you must display an explicit text followed by the sorted positive integer sequence.
   * On the third line, you must display an explicit message indicating the time taken by your algorithm, specifying the first container used to sort the positive integer sequence.
   * On the last line you must display an explicit text indicating the time used by your algorithm by specifying the second container used to sort the positive integer sequence.
-  * [cite_start]The format for the display of the time used to carry out your sorting is free but the precision chosen must allow to clearly see the difference between the two containers used. [cite: 1543-1548]
+  * The format for the display of the time used to carry out your sorting is free but the precision chosen must allow to clearly see the difference between the two containers used.
 
 **Example Usage:**
 
 ```
 $> ./PmergeMe 3 5 9 7 4
-Before: 3 5 9 7 4
-After: 3 4 5 7 9
-Time to process a range of 5 elements with std::[..] : 0.00031 us
-Time to process a range of 5 elements with std::[..] : 0.00014 us
-```
-
-```
+Before:  3 5 9 7 4
+After:   3 4 5 7 9
+Time to process a range of   5 elements with std::[..] :  0.00031 us
+Time to process a range of   5 elements with std::[..] :  0.00014 us
 $> ./PmergeMe `shuf -i 1-100000 -n 3000 | tr "\n" " "`
-Before: 141 79 526 321 [...]
-After: 79 141 321 526 [...]
+Before:  141 79 526 321 [...]
+After:   79 141 321 526 [...]
 Time to process a range of 3000 elements with std::[..] : 62.14389 us
 Time to process a range of 3000 elements with std::[..] : 69.27212 us
+$> ./PmergeMe "-1" "2"
+Error
+$> # For OSX USER:
+$> ./PmergeMe `jot -r 3000 1 100000 | tr '\n' ' '`
+[...]
 ```
 
+  * The commands shown above (shuf, jot) are only examples used to generate an input sequence. Your program must handle any sequence of positive integers, including repeated values.
+  * The indication of the time is deliberately strange in this example. Of course you have to indicate the time used to perform all your operations, both the sorting part and the data management part.
   * **Warning:** The container(s) you used in the previous exercises are forbidden here.
-  * [cite_start]The management of errors related to duplicates is left to your discretion. [cite: 1550-1579]
 
 -----
 
@@ -140,8 +242,9 @@ Time to process a range of 3000 elements with std::[..] : 69.27212 us
 
 ### Submission and peer-evaluation
 
-  * Turn in your assignment in your Git repository as usual. Only the work inside your repository will be evaluated during the defense. [cite_start]Don't hesitate to double check the names of your folders and files to ensure they are correct. [cite: 1584-1586]
-  * During the evaluation, a brief modification of the project may occasionally be requested.
-  * This could involve a minor behavior change, a few lines of code to write or rewrite, or an easy-to-add feature.
-  * This step is meant to verify your actual understanding of a specific part of the project.
-  * [cite_start]The modification can be performed in any development environment you choose (e.g., your usual setup), and it should be feasible within a few minutes unless a specific timeframe is defined as part of the evaluation. [cite: 1587-1592]
+  * Turn in your assignment in your Git repository as usual. Only the work inside your repository will be evaluated during the defense. Don't hesitate to double check the names of your folders and files to ensure they are correct.
+  * During the evaluation, a brief **modification of the project** may occasionally be requested. This could involve a minor behaviour change, a few lines of code to write or rewrite, or an easy-to-add feature.
+  * While this step may not be applicable to every project, you must be prepared for it if it is mentioned in the evaluation guidelines.
+  * This step is meant to verify your actual understanding of a specific part of the project. The modification can be performed in any development environment you choose (e.g., your usual setup), and it should be feasible within a few minutes — unless a specific time frame is defined as part of the evaluation.
+  * You can, for example, be asked to make a small update to a function or script, modify a display, or adjust a data structure to store new information, etc.
+  * The details (scope, target, etc.) will be specified in the evaluation guidelines and may vary from one evaluation to another for the same project.

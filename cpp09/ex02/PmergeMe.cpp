@@ -344,6 +344,24 @@ void PmergeMe::displayTiming(void) const {
 		<< std::endl;
 }
 
+PmergeMe::InvalidInputException::InvalidInputException(void) {
+}
+
+PmergeMe::InvalidInputException::InvalidInputException(const InvalidInputException& other)
+	: std::exception(other) {
+}
+
+PmergeMe::InvalidInputException& PmergeMe::InvalidInputException::operator=(
+	const InvalidInputException& other) {
+	if (this != &other) {
+		std::exception::operator=(other);
+	}
+	return *this;
+}
+
+PmergeMe::InvalidInputException::~InvalidInputException() throw() {
+}
+
 const char* PmergeMe::InvalidInputException::what() const throw() {
 	return "Invalid input";
 }
