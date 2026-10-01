@@ -1,12 +1,91 @@
 #include "BitcoinExchange.hpp"
 
+#include <cerrno>
 #include <cctype>
 #include <cstdlib>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <limits>
-#include <sstream>
+#include <utility>
+
+namespace {
+
+enum ValueStatus {
+	VALUE_OK,
+	BAD_FORMAT,
+	NEGATIVE_VALUE,
+	TOO_LARGE
+};
+
+// Check the decimal text before double conversion can round it to 0 or 1000.
+// Scientific notation is accepted too, as it was by the numeric parser.
+ValueStatus validateDecimalValue(const std::string& text, bool checkUpperBound) {
+	if (text.empty())
+		return BAD_FORMAT;
+	size_t start = (text[0] == '+' || text[0] == '-') ? 1 : 0;
+	size_t exponentPos = text.find_first_of("eE", start);
+	size_t mantissaEnd = exponentPos == std::string::npos ? text.size() : exponentPos;
+	std::string digits;
+	size_t wholeDigits = 0;
+	bool hasDot = false;
+	for (size_t i = start; i < mantissaEnd; ++i) {
+		if (text[i] == '.' && !hasDot)
+			hasDot = true;
+		else if (text[i] >= '0' && text[i] <= '9') {
+			digits += text[i];
+			if (!hasDot)
+				++wholeDigits;
+		} else
+			return BAD_FORMAT;
+	}
+	if (digits.empty())
+		return BAD_FORMAT;
+
+	size_t exponent = 0;
+	bool negativeExponent = false;
+	if (exponentPos != std::string::npos) {
+		size_t i = exponentPos + 1;
+		if (i < text.size() && (text[i] == '+' || text[i] == '-')) {
+			negativeExponent = (text[i] == '-');
+			++i;
+		}
+		if (i == text.size())
+			return BAD_FORMAT;
+		// Larger exponents cannot change which side of 1000 this value is on.
+		const size_t cap = text.size() + 4;
+		for (; i < text.size(); ++i) {
+			if (text[i] < '0' || text[i] > '9')
+				return BAD_FORMAT;
+			size_t digit = static_cast<size_t>(text[i] - '0');
+			if (exponent > cap / 10 || digit > cap - exponent * 10)
+				exponent = cap;
+			else
+				exponent = exponent * 10 + digit;
+		}
+	}
+	size_t first = digits.find_first_not_of('0');
+	if (first == std::string::npos)
+		return VALUE_OK;
+	if (text[0] == '-')
+		return NEGATIVE_VALUE;
+	if (!checkUpperBound)
+		return VALUE_OK;
+	if (negativeExponent) {
+		if (exponent >= wholeDigits)
+			return VALUE_OK;
+		wholeDigits -= exponent;
+	} else
+		wholeDigits += exponent;
+	if (wholeDigits <= first || wholeDigits - first < 4)
+		return VALUE_OK;
+	if (wholeDigits - first > 4 || digits[first] != '1' ||
+		digits.find_first_not_of('0', first + 1) != std::string::npos)
+		return TOO_LARGE;
+	return VALUE_OK;
+}
+
+}
 
 BitcoinExchange::BitcoinExchange(void) {
 }
@@ -111,14 +190,14 @@ std::string BitcoinExchange::trim(const std::string& str) const {
 }
 
 double BitcoinExchange::stringToDouble(const std::string& str) const {
-	std::istringstream iss(str);
-	double value;
-	iss >> value;
-	if (iss.fail() || !iss.eof() || value != value ||
-		value == std::numeric_limits<double>::infinity() ||
-		value == -std::numeric_limits<double>::infinity()) {
+	char* end;
+	errno = 0;
+	double value = std::strtod(str.c_str(), &end);
+	if (end == str.c_str() || end != str.c_str() + str.size())
 		throw InvalidFormatException("Invalid number format");
-	}
+	if (value != value || value > std::numeric_limits<double>::max() ||
+		value < -std::numeric_limits<double>::max() || (errno == ERANGE && value == 0))
+		throw InvalidValueException("Number out of range");
 	return value;
 }
 
@@ -179,6 +258,7 @@ void BitcoinExchange::loadDatabase(const std::string& filename) {
 	
 	std::string line;
 	bool firstLine = true;
+	std::map<std::string, double> rates;
 	
 	while (std::getline(file, line)) {
 		if (!line.empty() && line[line.size() - 1] == '\r')
@@ -206,18 +286,21 @@ void BitcoinExchange::loadDatabase(const std::string& filename) {
 			throw InvalidFormatException("Invalid date in database: " + date);
 		}
 		
-		try {
-			double rate = stringToDouble(rateStr);
-			if (rate < 0) {
-				throw InvalidValueException("Negative exchange rate in database: " + rateStr);
-			}
-			_exchangeRates[date] = rate;
-		} catch (const InvalidFormatException& e) {
+		ValueStatus status = validateDecimalValue(rateStr, false);
+		if (status == BAD_FORMAT)
 			throw InvalidFormatException("Invalid exchange rate format: " + rateStr);
-		}
+		if (status == NEGATIVE_VALUE)
+			throw InvalidValueException("Negative exchange rate in database: " + rateStr);
+		double rate = stringToDouble(rateStr);
+		if (!rates.insert(std::make_pair(date, rate)).second)
+			throw InvalidFormatException("Duplicate date in database: " + date);
 	}
-	
-	file.close();
+
+	if (!file.eof())
+		throw FileException("Could not read database file: " + filename);
+	if (rates.empty())
+		throw InvalidFormatException("Empty exchange rate database");
+	_exchangeRates.swap(rates);
 }
 
 double BitcoinExchange::getExchangeRate(const std::string& date) const {
@@ -272,6 +355,19 @@ void BitcoinExchange::processInput(const std::string& filename) {
 			std::cout << "Error: bad input => " << date << std::endl;
 			continue;
 		}
+		ValueStatus status = validateDecimalValue(valueStr, true);
+		if (status == BAD_FORMAT) {
+			std::cout << "Error: bad input => " << valueStr << std::endl;
+			continue;
+		}
+		if (status == NEGATIVE_VALUE) {
+			std::cout << "Error: not a positive number." << std::endl;
+			continue;
+		}
+		if (status == TOO_LARGE) {
+			std::cout << "Error: too large a number." << std::endl;
+			continue;
+		}
 		
 		double value;
 		try {
@@ -279,20 +375,22 @@ void BitcoinExchange::processInput(const std::string& filename) {
 		} catch (const InvalidFormatException& e) {
 			std::cout << "Error: bad input => " << valueStr << std::endl;
 			continue;
-		}
-		
-		if (value < 0) {
-			std::cout << "Error: not a positive number." << std::endl;
+		} catch (const InvalidValueException& e) {
+			std::cout << "Error: " << e.what() << std::endl;
 			continue;
 		}
-		if (value > 1000) {
-			std::cout << "Error: too large a number." << std::endl;
-			continue;
-		}
-		
+
+		if (value == 0)
+			value = 0; // Normalize a valid textual -0 for display.
+
 		try {
 			double rate = getExchangeRate(date);
 			double result = value * rate;
+			if (result > std::numeric_limits<double>::max() ||
+				(value != 0 && rate != 0 && result == 0))
+				throw InvalidValueException("Exchange result out of range");
+			if (result == 0)
+				result = 0;
 			std::cout << std::setprecision(std::numeric_limits<double>::digits10)
 				<< date << " => " << value << " = " << result << std::endl;
 		} catch (const InvalidValueException& e) {
@@ -300,5 +398,8 @@ void BitcoinExchange::processInput(const std::string& filename) {
 		}
 	}
 	
-	file.close();
+	if (!file.eof())
+		throw FileException("Could not read input file: " + filename);
+	if (firstLine)
+		throw InvalidFormatException("Empty input file");
 }

@@ -1,7 +1,8 @@
 #include "RPN.hpp"
 
 #include <cctype>
-#include <climits>
+#include <limits>
+#include <locale>
 #include <sstream>
 
 RPN::RPN(void) {
@@ -99,32 +100,30 @@ bool RPN::isNumber(const std::string& token) const {
 		std::isdigit(static_cast<unsigned char>(token[0]));
 }
 
-int RPN::performOperation(int left, int right, const std::string& op) const {
+double RPN::performOperation(double left, double right, const std::string& op) const {
+	double result;
 	if (op == "+") {
-		double result = static_cast<double>(left) + right;
-		if (result < INT_MIN || result > INT_MAX)
-			throw InvalidExpressionException("Integer overflow");
-		return static_cast<int>(result);
+		result = left + right;
 	} else if (op == "-") {
-		double result = static_cast<double>(left) - right;
-		if (result < INT_MIN || result > INT_MAX)
-			throw InvalidExpressionException("Integer overflow");
-		return static_cast<int>(result);
+		result = left - right;
 	} else if (op == "*") {
-		double result = static_cast<double>(left) * right;
-		if (result < INT_MIN || result > INT_MAX)
-			throw InvalidExpressionException("Integer overflow");
-		return static_cast<int>(result);
+		result = left * right;
 	} else if (op == "/") {
 		if (right == 0) {
 			throw DivisionByZeroException();
 		}
-		if (left == INT_MIN && right == -1)
-			throw InvalidExpressionException("Integer overflow");
-		return left / right;
+		result = left / right;
 	} else {
 		throw InvalidExpressionException("Unknown operator: " + op);
 	}
+	if (result != result || result > std::numeric_limits<double>::max() ||
+		result < -std::numeric_limits<double>::max())
+		throw InvalidExpressionException("Floating-point overflow");
+	if ((op == "*" || op == "/") && left != 0 && right != 0 && result == 0)
+		throw InvalidExpressionException("Floating-point underflow");
+	if (result == 0)
+		return 0;
+	return result;
 }
 
 void RPN::processToken(const std::string& token) {
@@ -135,19 +134,19 @@ void RPN::processToken(const std::string& token) {
 			throw InsufficientOperandsException();
 		}
 		
-		int operand2 = _operands.top();
+		double operand2 = _operands.top();
 		_operands.pop();
-		int operand1 = _operands.top();
+		double operand1 = _operands.top();
 		_operands.pop();
 		
-		int result = performOperation(operand1, operand2, token);
+		double result = performOperation(operand1, operand2, token);
 		_operands.push(result);
 	} else {
 		throw InvalidExpressionException("Invalid token: " + token);
 	}
 }
 
-int RPN::evaluate(const std::string& expression) {
+double RPN::evaluate(const std::string& expression) {
 	reset();
 	
 	if (expression.empty()) {
@@ -155,6 +154,7 @@ int RPN::evaluate(const std::string& expression) {
 	}
 	
 	std::istringstream iss(expression);
+	iss.imbue(std::locale::classic());
 	std::string token;
 	
 	while (iss >> token) {
@@ -165,8 +165,7 @@ int RPN::evaluate(const std::string& expression) {
 		throw InvalidExpressionException("Invalid expression");
 	}
 	
-	int result = _operands.top();
-	return result;
+	return _operands.top();
 }
 
 void RPN::reset(void) {

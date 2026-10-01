@@ -91,20 +91,20 @@ c++ -Wall -Wextra -Werror -std=c++98 \
 | Exercise | Container | Defense |
 |---|---|---|
 | ex00 `btc` | `std::map<std::string, double>` | ordered keyと`lower_bound`による過去日の探索。 |
-| ex01 `RPN` | `std::stack<int, std::list<int> >` | LIFO評価を明示し、backing containerを過去Exerciseと分ける。 |
+| ex01 `RPN` | `std::stack<double>` | LIFO評価と除算結果の小数保持。ex01はstackのみを明示使用する。 |
 | ex02 `PmergeMe` | `std::vector<int>`と`std::deque<int>` | subject要求の別々の2 containersで、両方をFord–Johnsonとして実装。 |
 
 | Exercise | Review contract / design defense | Test coverage | 想定質問 | ライブコーディング案 | Stop rule |
 |---|---|---|---|---|---|
 | ex00 `btc` | CSVを`map`へ読み、入力dateのexact matchまたは過去側closest rateを使う。`lower_bound(date)`がbeginならrateなし、そうでなければ`--it`する。bad lineは表示して後続行を継続する。 | empty input、bad delimiter/date/value、leap year、DB先頭前/中間/末尾後、0/1000境界、`input.csv`。 | 「なぜ`lower_bound`後にdecrementか？」→戻りは最初の`>= date`なので、exact以外で直前が過去側最大keyだから。 | DB中間日と最終日より未来を実行してrateを確認。 | future側rateを選ぶ、beginをdecrement、bad lineで全処理停止、invalid date/値を通す。 |
-| ex01 `RPN` | tokenは1桁整数または演算子。pop順は最初がright、次がleft。演算前にoperand数、zero division、overflowを検査する。 | subject例、`42`、`42`、`15`、減算/除算順、余りtoken、decimal、zero division、加減乗除overflow。 | 「`-`のoperand順は？」→`right=pop(); left=pop(); left-right`。 | `5 2 -`と`5 2 /`、`INT_MIN / -1`拒否を実演。 | 逆順計算、stack final sizeが1でない、overflow後に演算、エラーで成功終了。 |
+| ex01 `RPN` | tokenは1桁整数または演算子。pop順は最初がright、次がleft。operand数とzero divisionを演算前、非有限な結果を演算後に検査する。計算・結果はdoubleを保持する。 | subject例、`42`、`42`、`15`、減算/除算順、余りtoken、decimal、zero division、加減乗除overflow。 | 「`-`のoperand順は？」→`right=pop(); left=pop(); left-right`。 | `5 2 -`、`5 2 /`→2.5、評価指摘の式→6912を実演。 | 逆順計算、stack final sizeが1でない、overflow後に演算、エラーで成功終了。 |
 | ex02 `PmergeMe` | vector/dequeそれぞれでFord–Johnsonを実装する。pairでwinner/partnerを作り、winnerを再帰sort、`b1`を先頭へ、残りをJacobsthal順にpartnerまでbinary insertしstragglerを処理する。 | 5〜10手動、重複、降順、3000 random、両containerのsorted/multiset一致、表示前後、timing。 | 「partner boundはなぜ正しい？」→pair比較で`b_j <= a_j`が既知であり、`a_j`右側は探索不要。 | 5〜10要素でpair/winner/pending/chainsを紙またはdebug出力で追い、Jacobsthal順を説明。 | 一方だけ別algorithm、partner右側を探索、Jacobsthalなし、3000 random未検証、時間を比較回数と混同。 |
 
 ### CPP09 口頭防御の要点
 
 - `btc`の`YYYY-MM-DD`は固定幅なら辞書順と暦順が一致する。日付妥当性はformatだけでなく閏年・月日数まで検査する。
 - current EvalHubの`input.csv`（header+21 data、22行）を実行し、exit 0・21 output linesを確認した。bad valueを報告した後も後続行を継続し、exact dateとclosest lower dateの両方を確認した。
-- RPNは`double`へ逃がさず整数stackでsubjectの整数演算を行う。先にpopするoperandがrightであることを、減算・除算で必ず実演する。
+- RPNは入力の1桁整数と演算結果を区別し、`std::stack<double>`で除算の小数を保持する。先にpopするoperandがrightであることを、減算・除算で必ず実演する。
 - RPN advanced指定3式は順に`42`、`42`、`15`となることを最終実測した。
 - Ford–Johnsonのpartner boundは比較回数を抑える根拠、Jacobsthal順はbinary insertionの探索長を整える順序である。wall-clock timingは環境・container差を観測する指標で、比較回数の証明ではない。
 - timingはparseを含めるか、含めないなら両containerで同じ境界に揃える。microseconds表示の意味と、単発値を性能保証にしないことを説明する。

@@ -3,6 +3,7 @@
 > **対象**: `cpp09/ex00`〜`ex02`（Bitcoin Exchange / 逆ポーランド記法 / Ford-Johnson 法）。基準は公式 subject Version 3.3
 > **この文書の役割**: 実装を読む人のための解説書であり、同時に自分がどこで何を理解したかの学習記録である。
 > **提出手続き・リポジトリ同一性の確認**は [REVIEW_NOTES.md](REVIEW_NOTES.md) に分離してある。ここでは扱わない。
+> **2026-10-01 の評価指摘への修正と再検証**は [CPP09 修正レポート](docs/cpp09-repair.md) を参照する。以下の過去の検証記録と、今回の結果を区別する。
 
 ## 読み方
 
@@ -21,7 +22,7 @@
 ```text
 コンテナの割り当て（一度使ったものは後の Exercise で使えない）:
         ex00  btc        std::map<std::string, double>
-        ex01  RPN        std::stack<int, std::list<int> >     ← 中身を list にして deque を避ける
+        ex01  RPN        std::stack<double>                  ← 演算途中の小数を保持
         ex02  PmergeMe   std::vector と std::deque
 
 ex00 の直前の日付:
@@ -34,7 +35,7 @@ ex00 のエラー行:
 
 ex01 の計算:
         数字 1 文字なら積む。演算子なら 右 → 左 の順に 2 つ取り出して計算し、結果を積む
-        最後にちょうど 1 つ残ったものが答え。途中の計算は double で範囲を確かめてから int に戻す
+        最後にちょうど 1 つ残ったものが答え。計算と結果は double のまま保持し、整数へ戻さない
 
 ex02 の Ford-Johnson:
         ペアにして勝者（大）と敗者（小）に分ける → 勝者だけを再帰で並べる
@@ -46,7 +47,7 @@ ex02 の Ford-Johnson:
         本体 3 つ（BitcoinExchange / RPN / PmergeMe）と入れ子の例外クラス 7 つが、すべて OCF の 4 つを明示
 ```
 
-ビルド条件は全 Exercise 共通で `c++ -Wall -Wextra -Werror -std=c++98`（[ex00/Makefile#L3-L4](cpp09/ex00/Makefile#L3)）。
+ビルド条件は全 Exercise 共通で `c++ -Wall -Wextra -Werror -std=c++98`（[ex00/Makefile](cpp09/ex00/Makefile)）。
 
 ---
 
@@ -84,11 +85,11 @@ Chapter III には、Makefile が `$(NAME)`・`all`・`clean`・`fclean`・`re` 
 
 | Exercise | コンテナ | 選んだ理由 |
 |---|---|---|
-| ex00 | `std::map<std::string, double>`（[BitcoinExchange.hpp#L10](cpp09/ex00/BitcoinExchange.hpp#L10)） | 日付をキーに、**キーの順に並んだまま**持てる。`YYYY-MM-DD` は桁数が固定なので、文字列の辞書順がそのまま日付の順になる。`find` で完全一致、`lower_bound` で直前の日付を O(log n) で探せる |
-| ex01 | `std::stack<int, std::list<int> >`（[RPN.hpp#L11](cpp09/ex01/RPN.hpp#L11)） | 逆ポーランド記法は「最後に積んだ 2 つを取り出す」ので LIFO がそのまま合う。**std::stack の中のコンテナは既定で deque** で、deque は ex02 で使うため、中身を list に指定して重ならないようにした |
+| ex00 | `std::map<std::string, double>`（[BitcoinExchange.hpp](cpp09/ex00/BitcoinExchange.hpp)） | 日付をキーに、**キーの順に並んだまま**持てる。`YYYY-MM-DD` は桁数が固定なので、文字列の辞書順がそのまま日付の順になる。`find` で完全一致、`lower_bound` で直前の日付を O(log n) で探せる |
+| ex01 | `std::stack<double>`（[RPN.hpp](cpp09/ex01/RPN.hpp)） | 逆ポーランド記法は「最後に積んだ 2 つを取り出す」ので LIFO がそのまま合う。演算に使用するコンテナは stack のみで、別の list は宣言しない。内部保存には既定の deque が使われる |
 | ex02 | `std::vector` と `std::deque`（[PmergeMe.hpp#L12-L13](cpp09/ex02/PmergeMe.hpp#L12)） | 二分探索で挿入位置を探すので、添字で直接アクセスできるコンテナが要る。どちらも前の Exercise で使っていない。連続メモリの vector と、ブロックに分かれた deque で速度を比べられる |
 
-ex00 と ex01 で使っているのは map、stack、list だけである。`std::string` と `std::istringstream` は文字列とストリームのクラスで、この割り当ての対象として扱っていない。
+ex00 と ex01 が明示的に使用するコンテナは map と stack である。`std::string` と `std::istringstream` は文字列とストリームのクラスで、この割り当ての対象として扱っていない。
 
 ---
 
@@ -102,7 +103,7 @@ ex00 と ex01 で使っているのは map、stack、list だけである。`std
 
 処理は「data.csv を map に読み込む → 入力ファイルを 1 行ずつ検証する → レートを探して掛け算して表示する」の 3 段である。
 
-直前の日付の検索は次のとおり（[BitcoinExchange.cpp#L223-L237](cpp09/ex00/BitcoinExchange.cpp#L223)）。
+直前の日付の検索は次のとおり（[BitcoinExchange.cpp](cpp09/ex00/BitcoinExchange.cpp)）。
 
 ```cpp
 double BitcoinExchange::getExchangeRate(const std::string& date) const {
@@ -122,9 +123,9 @@ double BitcoinExchange::getExchangeRate(const std::string& date) const {
 }
 ```
 
-入力の各行は、`" | "` の有無 → 日付 → 値の形式 → 値の範囲 の順に確かめ、どこかで引っかかればメッセージを出して `continue` する（[BitcoinExchange.cpp#L239-L304](cpp09/ex00/BitcoinExchange.cpp#L239)）。日付は長さ 10・区切りの `-`・数字・月 1〜12・うるう年を考慮した日数で検証する（[#L129-L172](cpp09/ex00/BitcoinExchange.cpp#L129)）。値は `std::istringstream` で double として読み、最後まで読み切れたか、NaN や無限大でないかを確かめる（[#L113-L123](cpp09/ex00/BitcoinExchange.cpp#L113)）。
+入力の各行は、`" | "` の有無 → 日付 → 値の形式 → 値の範囲 の順に確かめ、どこかで引っかかればメッセージを出して `continue` する（[BitcoinExchange.cpp](cpp09/ex00/BitcoinExchange.cpp)）。日付は長さ 10・区切りの `-`・数字・月 1〜12・うるう年を考慮した日数で検証する（[BitcoinExchange.cpp](cpp09/ex00/BitcoinExchange.cpp)）。値は符号・小数点・指数の構文を検証し、変換前の十進数字で負数と 1000 超を判定する。その後 `std::strtod` で double へ変換し、非有限値やゼロへのアンダーフローを範囲エラーにする（[BitcoinExchange.cpp](cpp09/ex00/BitcoinExchange.cpp)）。
 
-main は引数がちょうど 1 つでなければ `Error: could not open file.` を出し、DB と入力を処理する（[main.cpp#L6-L25](cpp09/ex00/main.cpp#L6)）。DB は `"data.csv"` をカレントディレクトリから開く（[main.cpp#L14](cpp09/ex00/main.cpp#L14)）。
+main は引数がちょうど 1 つでなければ `Error: could not open file.` を出し、DB と入力を処理する（[main.cpp](cpp09/ex00/main.cpp)）。DB はカレントディレクトリの `data.csv` を優先し、無ければ実行ファイルのパスと同じディレクトリを探す（[main.cpp](cpp09/ex00/main.cpp)）。
 
 ### なぜこの設計か
 
@@ -135,11 +136,11 @@ DB:   … 2011-01-01 (0.3) │ 2011-01-04 (0.3) │ 2011-01-07 (0.32) …
 入力  2011-01-03 → lower_bound = 2011-01-04 → --it = 2011-01-01 → 3 × 0.3 = 0.9
 ```
 
-**入力ファイルのエラーでは止まらず、DB のエラーでは止まる。** 入力の不正な行は 1 行の問題なので、表示して次の行に進む。評価表も「ファイル全体を処理する前に止まってはならない」としている。一方 DB（data.csv）は計算の前提なので、日付やレートが壊れていれば例外で終了する（[#L205-L217](cpp09/ex00/BitcoinExchange.cpp#L205)）。続けても正しい結果が出ないからである。
+**入力ファイルのエラーでは止まらず、DB のエラーでは止まる。** 入力の不正な行は 1 行の問題なので、表示して次の行に進む。評価表も「ファイル全体を処理する前に止まってはならない」としている。一方 DB（data.csv）は計算の前提なので、日付やレートが壊れていれば例外で終了する（[BitcoinExchange.cpp](cpp09/ex00/BitcoinExchange.cpp)）。続けても正しい結果が出ないからである。
 
-**表示の精度は `setprecision(15)`** にした（[#L296-L297](cpp09/ex00/BitcoinExchange.cpp#L296)）。double で意味のある桁数（`digits10`）である。既定の 6 桁だと `1000 × 47115.93` が `4.71159e+07` のような指数表記になり、17 桁にすると `1.2 × 0.3` が `0.35999999999999999` と表示される。15 桁ならそれぞれ `47115930`・`0.36` になる。
+**表示の精度は `setprecision(15)`** にした（[BitcoinExchange.cpp](cpp09/ex00/BitcoinExchange.cpp)）。double で意味のある桁数（`digits10`）である。既定の 6 桁だと `1000 × 47115.93` が `4.71159e+07` のような指数表記になり、17 桁にすると `1.2 × 0.3` が `0.35999999999999999` と表示される。15 桁ならそれぞれ `47115930`・`0.36` になる。
 
-**行末の `\r` を取り除いている**（[#L249-L250](cpp09/ex00/BitcoinExchange.cpp#L249)）。Windows 形式の改行のファイルを渡されても、見出しと値を正しく読める。
+**行末の `\r` を取り除いている**（[BitcoinExchange.cpp](cpp09/ex00/BitcoinExchange.cpp)）。Windows 形式の改行のファイルを渡されても、見出しと値を正しく読める。
 
 ### 学習メモ
 
@@ -160,7 +161,7 @@ DB:   … 2011-01-01 (0.3) │ 2011-01-04 (0.3) │ 2011-01-07 (0.32) …
 
 ### 実装
 
-トークンを空白で区切り、数なら積み、演算子なら 2 つ取り出して計算する（[RPN.cpp#L130-L148](cpp09/ex01/RPN.cpp#L130)）。
+トークンを空白で区切り、数なら積み、演算子なら 2 つ取り出して計算する（[RPN.cpp](cpp09/ex01/RPN.cpp)）。
 
 ```cpp
 void RPN::processToken(const std::string& token) {
@@ -171,12 +172,12 @@ void RPN::processToken(const std::string& token) {
 			throw InsufficientOperandsException();
 		}
 
-		int operand2 = _operands.top();
+		double operand2 = _operands.top();
 		_operands.pop();
-		int operand1 = _operands.top();
+		double operand1 = _operands.top();
 		_operands.pop();
 
-		int result = performOperation(operand1, operand2, token);
+		double result = performOperation(operand1, operand2, token);
 		_operands.push(result);
 	} else {
 		throw InvalidExpressionException("Invalid token: " + token);
@@ -184,7 +185,7 @@ void RPN::processToken(const std::string& token) {
 }
 ```
 
-数として受け付けるのは数字 1 文字だけである（[RPN.cpp#L97-L100](cpp09/ex01/RPN.cpp#L97)）。四則演算は double で計算して int の範囲を超えたら例外にし、割り算は 0 除算と `INT_MIN / -1` を弾く（[#L102-L128](cpp09/ex01/RPN.cpp#L102)）。式の終わりに積んである数がちょうど 1 つでなければ例外にする（[#L164-L166](cpp09/ex01/RPN.cpp#L164)）。main はどの例外も標準エラーへの `Error` にまとめる（[ex01/main.cpp#L11-L19](cpp09/ex01/main.cpp#L11)）。
+数として受け付けるのは数字 1 文字だけである（[RPN.cpp](cpp09/ex01/RPN.cpp)）。四則演算と結果を double のまま保持し、0 除算・非有限な結果・非ゼロ同士の乗除算がゼロへ消失する場合を例外にする。式の終わりに積んである数がちょうど 1 つでなければ例外にする。main はどの例外も標準エラーへの `Error` にまとめる（[ex01/main.cpp](cpp09/ex01/main.cpp)）。
 
 ### なぜこの設計か
 
@@ -192,12 +193,11 @@ void RPN::processToken(const std::string& token) {
 
 **数字 1 文字だけを数として受け付ける。** subject が「数は常に 10 未満」としているので、`12`・`-1`・`1.5` は不正なトークンとしてエラーにする。受け付けたうえで黙って別の値として扱うよりも、入力の誤りとして伝える方を選んだ（旧版で起きていたことは学習メモを参照）。
 
-**オーバーフローは計算前に防ぐ。** int のまま計算してあふれると未定義動作になる。いったん double で計算して範囲を確かめ、収まるときだけ int に戻す。割り算で int に収まらないのは `INT_MIN / -1` だけなので、個別に弾いている。割り算は C++ の整数除算なので 0 の方向に切り捨てる（`0 3 - 2 /` は −1）。
+**入力の小数と、演算結果の小数は区別する。** 入力は 1 桁整数だけでも、`8 3 /` の結果は小数になる。整数へ戻すと後続の乗算も誤るため、`std::stack<double>`・演算の戻り値・main の表示まで double を通す。`"8 3 / 2 * 6 * 6 * 6 * 6 *"` は 6912、`"0 3 - 2 /"` は −1.5 になる。0 除算と非有限な結果はエラーにし、INT_MAX を結果の上限にはしない。
 
 ### 学習メモ
 
-- **旧版はコンテナの規則に違反していた。** 2026-07-21 の整理（`80d365f`）より前の RPN は `std::stack<double>` を使っていた（`git show 80d365f^:cpp09/ex01/RPN.hpp` の 13 行目）。std::stack は中に別のコンテナを持つアダプタで、**何も指定しなければ中身は deque** になる。deque は ex02 で使っているので、評価表の「前の Exercise と同じコンテナなら評価終了」にそのまま当たる状態だった。中身を `std::list<int>` と明示して解決した。**アダプタを使うときは、中に何があるかまで数える**必要がある。両方のモジュールを通して、いちばん大きな学びだった。
-- **旧版は小数と負の数を受け付けて、黙って間違えていた。** 旧版は値を double で持ち、符号付きの数や小数も数として受け付け、最後に `static_cast<int>(result)` で表示していた（旧 `main.cpp` の 13 行目）。旧版に `"1.5 1 +"` を渡すと `2`（正しくは 2.5）、`"1 2 /"` を渡すと `0` を出す。エラーにもならず、切り捨てた値を正しい答えのように出していた。数を数字 1 文字に限り、計算を int にそろえたのはこのためである。
+- **2026-10-01 の評価指摘による訂正。** 入力が 1 桁整数であることを、途中計算も整数でよいという条件と取り違えていた。整数除算を正解とするテストも修正し、分数による独立した正解と照合する回帰テストを追加した。ex01 は stack のみで実装する。
 - **例外クラスの実装がヘッダにあった。** 旧 `RPN.hpp` では 3 つの例外クラスの `what()` などがクラス定義の中に書かれていた（同ヘッダの 35〜51 行目）。btc と同じく 0 点条件に当たるので、.cpp に移した。
 
 ---
@@ -270,7 +270,7 @@ b3 b2 | b5 b4 | b11 b10 … b6 | b21 … b12 | …
 
 ### 8.1 btc は ex00 ディレクトリの中で実行する前提
 
-main は DB を `"data.csv"` としてカレントディレクトリから開く（[main.cpp#L14](cpp09/ex00/main.cpp#L14)）。リポジトリの直下などから `cpp09/ex00/btc input.txt` のように実行すると、DB が開けずに `Error: could not open file.` になる。評価では `cd cpp09/ex00` してから実行する。
+main は DB を `"data.csv"` としてカレントディレクトリから開く（[main.cpp](cpp09/ex00/main.cpp)）。リポジトリの直下などから `cpp09/ex00/btc input.txt` のように実行すると、DB が開けずに `Error: could not open file.` になる。評価では `cd cpp09/ex00` してから実行する。
 
 ### 8.2 btc に空のファイルを渡すと何も表示しない
 
@@ -309,8 +309,8 @@ main は DB を `"data.csv"` としてカレントディレクトリから開く
 **Q. なぜ `setprecision(15)` なのか。**
 double で意味のある桁数だから。6 桁だと大きい金額が指数表記になり、17 桁だと `0.36` が `0.35999999999999999` になる。
 
-**Q. ex01 で stack を選んだ理由と、中身を list にした理由は。**
-逆ポーランド記法は最後に積んだ 2 つを使うので LIFO が合う。std::stack の中身は既定で deque で、deque は ex02 で使うため、中身を list に指定した。旧版は既定のままで、規則に違反していた。
+**Q. ex01 で stack と double を選んだ理由は。**
+逆ポーランド記法は最後に積んだ 2 つを使うので LIFO が合う。double は除算で生じる小数を後続演算まで保持するため。`std::stack<double>` だけを宣言する。
 
 **Q. 取り出す順番で気をつけていることは。**
 先に取り出したものが右側。`3 4 -` は −1 になる。
@@ -319,7 +319,7 @@ double で意味のある桁数だから。6 桁だと大きい金額が指数�
 subject が数は 10 未満、小数は扱わなくてよいとしているから。受け付けて丸めると、旧版のように黙って間違った答えを出す。
 
 **Q. オーバーフローはどう防いでいるか。**
-double で計算して int の範囲を確かめてから戻す。割り算は `INT_MIN / -1` だけがあふれるので個別に弾く。
+0 除算を演算前に拒否する。演算後に NaN・無限大と、非ゼロ同士の乗除算がゼロへ消失する場合を検査する。結果は double のまま返し、整数へのキャストや INT_MAX 制限を行わない。
 
 **Q. Ford-Johnson 法を簡単に説明してほしい。**
 ペアにして大きい方と小さい方に分け、大きい方だけを再帰で並べて主列を作る。小さい方は、相手より前の範囲だけを二分探索して Jacobsthal 数の順に挿入する。こうすると比較の回数が最小に近くなる。
@@ -334,7 +334,7 @@ double で計算して int の範囲を確かめてから戻す。割り算は `
 b1 は最小の勝者 a1 より小さく（ペアで比べ済み）、a1 はほかのすべての勝者より小さいので、主列のどれよりも小さいことが分かっているから。
 
 **Q. vector と deque を選んだ理由は。**
-二分探索で添字アクセスを多用するので、ランダムアクセスできるコンテナが要る。list はランダムアクセスできず、map・stack・list は前の Exercise で使っている。
+二分探索で添字アクセスを多用するので、ランダムアクセスできるコンテナが要る。list はランダムアクセスできず、map・stack は前の Exercise で使っている。
 
 **Q. 時間の差はなぜ出るのか。**
 vector は連続メモリで添字アクセスがアドレス計算 1 回で済み、キャッシュにも乗りやすい。deque はブロックに分かれていて、アクセスのたびにどのブロックかを求める。
@@ -458,9 +458,9 @@ subject の最終章に、評価中に軽微な改修を求められることが
 
 | 依頼されそうなこと | 触る場所 | やること |
 |---|---|---|
-| btc で空のファイルにエラーを出す | [BitcoinExchange.cpp#L241-L243](cpp09/ex00/BitcoinExchange.cpp#L241) の直後 | `if (file.peek() == std::ifstream::traits_type::eof())` なら `Error: empty file.` を出して return |
-| RPN で 2 桁以上の数を受け付ける | [RPN.cpp#L97-L100](cpp09/ex01/RPN.cpp#L97) と [#L132](cpp09/ex01/RPN.cpp#L132) | 全文字が数字（最大 9 桁）なら数とし、`std::atoi(token.c_str())` で積む。`<cstdlib>` を include |
-| RPN に `%` を足す | [RPN.cpp#L93-L95](cpp09/ex01/RPN.cpp#L93) と [#L102-L128](cpp09/ex01/RPN.cpp#L102) | `isOperator` に `"%"` を足し、`performOperation` に 0 除算の確認つきの分岐を足す |
+| btc の空ファイルのエラーメッセージを変える | [BitcoinExchange.cpp](cpp09/ex00/BitcoinExchange.cpp) の `processInput` 末尾 | 現在は `Empty input file` の例外で終了する。ここでメッセージを変更する |
+| RPN で 2 桁以上の数を受け付ける | [RPN.cpp](cpp09/ex01/RPN.cpp) と [RPN.cpp](cpp09/ex01/RPN.cpp) | 全文字が数字（最大 9 桁）なら数とし、`std::atoi(token.c_str())` で積む。`<cstdlib>` を include |
+| RPN に `%` を足す | [RPN.cpp](cpp09/ex01/RPN.cpp) と [RPN.cpp](cpp09/ex01/RPN.cpp) | `isOperator` に `"%"` を足し、`performOperation` に 0 除算の確認と `std::fmod` を使う分岐を足す（`<cmath>` が必要） |
 | PmergeMe の長い列を省略表示する | [PmergeMe.cpp#L311-L319](cpp09/ex02/PmergeMe.cpp#L311) | 先頭 5 個だけ出し、残りがあれば ` [...]` を足す |
 | 時間を std::clock で計る | [PmergeMe.cpp#L269-L289](cpp09/ex02/PmergeMe.cpp#L269) と deque 版 | `std::clock()` の差 × 1000000 / `CLOCKS_PER_SEC`。`<ctime>` を include |
 
@@ -470,14 +470,14 @@ subject の最終章に、評価中に軽微な改修を求められることが
 
 | 誤解 | 正しい理解 |
 |---|---|
-| stack は stack で、deque とは別のコンテナ | std::stack の中身は既定で deque。ex02 で deque を使うなら、ex01 の stack の中身を変える必要がある |
+| stack だけでは ex01 を実装できない | `std::stack<double>` だけで演算できる。既定の内部保存は deque だが、ex01 では stack の API のみを使用する |
 | 直前の日付は lower_bound の結果そのもの | lower_bound は「以上」の最初。1 つ戻って初めて直前になる。先頭なら過去の日付がない |
 | 日付の順に並べるには日付型が要る | `YYYY-MM-DD` は桁数が固定なので、文字列の辞書順がそのまま日付の順 |
 | エラーの行が出たら処理を止める | 入力の誤りは表示して次の行へ。止まるのは DB が壊れているときだけ |
 | 表示を整えるなら fixed で桁を固定すればよい | 小さい値が 0 に丸められて消える。`setprecision(digits10)` に任せる |
 | 年の範囲を決めておくと安全 | subject にない制限は、正しい入力をはじく |
 | CRLF は気にしなくてよい | 見出しも値も `\r` 付きになり、全行がエラーになる |
-| RPN は double で計算すれば小数にも対応できる | subject は小数を求めていない。受け付けて int で表示すると黙って間違える |
+| RPN の入力は整数なので、計算も整数でよい | 入力が整数でも除算結果は小数になる。途中の計算と最終結果を double で保持する |
 | 取り出した 2 つは順不同 | 先に取り出したものが右側。引き算と割り算で結果が変わる |
 | merge-insert sort はマージソート＋挿入ソート | Ford-Johnson 法のこと。ペア分け・主列・Jacobsthal 順の挿入がない実装は別物 |
 | 挿入の順番は先頭からでよい | Jacobsthal 順にすることで、二分探索の範囲が 2^k − 1 個に収まり比較が無駄にならない |
