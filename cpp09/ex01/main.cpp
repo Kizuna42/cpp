@@ -1,6 +1,8 @@
 #include "RPN.hpp"
 
+#include <iomanip>
 #include <iostream>
+#include <limits>
 
 int main(int argc, char** argv) {
 	if (argc != 2) {
@@ -11,8 +13,9 @@ int main(int argc, char** argv) {
 	try {
 		RPN calculator;
 		std::string expression = argv[1];
-		int result = calculator.evaluate(expression);
-		std::cout << result << std::endl;
+		double result = calculator.evaluate(expression);
+		std::cout << std::setprecision(std::numeric_limits<double>::digits10)
+			<< result << std::endl;
 	} catch (const std::exception&) {
 		std::cerr << "Error" << std::endl;
 		return 1;
@@ -20,4 +23,3 @@ int main(int argc, char** argv) {
 	
 	return 0;
 }
-

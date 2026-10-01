@@ -4,6 +4,10 @@ C++98でC++の基礎からSTLまでを学ぶ42 Schoolの演習リポジトリで
 
 ## 現在の検証範囲
 
+2026-10-01 に CPP09 の評価不合格の指摘を受け、ex00 の厳密な数値範囲判定と ex01 の小数を保持する演算へ修正しました。ex02 は整列結果と Ford–Johnson の比較回数を独立監査しています。今回の対象は CPP09 の 3 課題です。詳細と再実行方法は [CPP09 修正レポート](docs/cpp09-repair.md) と [CPP09 回帰テスト](tests/cpp09/README.md) を参照してください。
+
+以下は前回の CPP05〜CPP09 全体監査の記録です。
+
 2026-09-02にCPP05〜CPP09の全16 Exerciseを、current 42 EvalHub HTML criteriaと全sourceに対して最終再監査しました。監査対象source baselineはcommit `e04faff6cdb55e15fa7be1f287fc512235a9d742`で、監査開始時はGitHub `main`とlocal `main`が一致し、worktreeはcleanでした。
 
 - CPP05: 4 Exercise

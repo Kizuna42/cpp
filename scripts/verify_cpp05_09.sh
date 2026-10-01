@@ -381,9 +381,7 @@ if grep -REq --include='*.cpp' --include='*.hpp' 'std::map' \
 	"$ROOT/cpp09/ex00" && \
 	grep -REq --include='*.cpp' --include='*.hpp' 'std::stack' \
 	"$ROOT/cpp09/ex01" && \
-	grep -REq --include='*.cpp' --include='*.hpp' 'std::list' \
-	"$ROOT/cpp09/ex01" && \
-	! grep -REq --include='*.cpp' --include='*.hpp' 'std::(map|vector|deque)' \
+	! grep -REq --include='*.cpp' --include='*.hpp' 'std::(map|list|vector|deque)' \
 	"$ROOT/cpp09/ex01" && \
 	grep -REq --include='*.cpp' --include='*.hpp' 'std::vector' \
 	"$ROOT/cpp09/ex02" && \
@@ -407,7 +405,9 @@ for dir in "${dirs[@]}"; do
 	fi
 done
 
-expect_exact 'RPN integer division at each step' '4' "$ROOT/cpp09/ex01/RPN" '5 2 / 2 *'
+expect_exact 'RPN preserves fractional intermediate results' '5' "$ROOT/cpp09/ex01/RPN" '5 2 / 2 *'
+expect_exact 'RPN evaluator division regression' '6912' "$ROOT/cpp09/ex01/RPN" \
+	'8 3 / 2 * 6 * 6 * 6 * 6 *'
 expect_exact 'RPN EvalHub case 42 one' '42' "$ROOT/cpp09/ex01/RPN" \
 	'8 9 * 9 - 9 - 9 - 4 - 1 +'
 expect_exact 'RPN EvalHub case 42 two' '42' "$ROOT/cpp09/ex01/RPN" \
@@ -418,7 +418,7 @@ expect_error 'RPN rejects empty expression' 'Error' "$ROOT/cpp09/ex01/RPN" ''
 expect_error 'RPN rejects decimal token' 'Error' "$ROOT/cpp09/ex01/RPN" '1.5 2 +'
 expect_error 'RPN rejects malformed expression' 'Error' "$ROOT/cpp09/ex01/RPN" '1 2'
 expect_error 'RPN rejects division by zero' 'Error' "$ROOT/cpp09/ex01/RPN" '1 0 /'
-expect_error 'RPN rejects integer overflow' 'Error' "$ROOT/cpp09/ex01/RPN" \
+expect_exact 'RPN results may exceed INT_MAX' '3486784401' "$ROOT/cpp09/ex01/RPN" \
 	'9 9 * 9 * 9 * 9 * 9 * 9 * 9 * 9 * 9 *'
 
 expect_error 'PmergeMe rejects zero' 'Error' "$ROOT/cpp09/ex02/PmergeMe" 0 1

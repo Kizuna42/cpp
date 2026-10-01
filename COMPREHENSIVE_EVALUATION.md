@@ -107,7 +107,7 @@ Internはnameとstatic creator function pointerのtableをloopして選ぶ。
 ### CPP09
 
 - btcは`map::lower_bound`のexact/non-exact/beginを区別し、invalid行を報告して処理を続ける。
-- RPNは`right`を先にpopし`left op right`を計算する。overflowと`INT_MIN / -1`を演算前に止める。
+- RPNは`right`を先にpopし`left op right`を計算する。0除算を演算前に止め、非有限な結果を拒否する。除算で生じる小数をdoubleで保持し、整数へ戻さない。
 - PmergeMeはvector/dequeの両方でpair/winner再帰sort/partner bound/Jacobsthal/stragglerを処理する。partner `a_j`より右は`b_j <= a_j`から探索不要である。
 
 
