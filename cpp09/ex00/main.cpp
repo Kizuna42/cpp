@@ -25,7 +25,7 @@ static std::string resolveDatabasePath(const char* programPath) {
 
 int main(int argc, char** argv) {
 	if (argc != 2) {
-		std::cerr << "Error: could not open file." << std::endl;
+		std::cout << "Error: could not open file." << std::endl;
 		return 1;
 	}
 	
@@ -34,10 +34,10 @@ int main(int argc, char** argv) {
 		exchange.loadDatabase(resolveDatabasePath(argv[0]));
 		exchange.processInput(argv[1]);
 	} catch (const BitcoinExchange::FileException&) {
-		std::cerr << "Error: could not open file." << std::endl;
+		std::cout << "Error: could not open file." << std::endl;
 		return 1;
 	} catch (const std::exception& e) {
-		std::cerr << "Error: " << e.what() << std::endl;
+		std::cout << "Error: " << e.what() << std::endl;
 		return 1;
 	}
 	

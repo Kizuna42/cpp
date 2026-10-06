@@ -2,12 +2,13 @@
 #define RPN_HPP
 
 #include <exception>
+#include <list>
 #include <stack>
 #include <string>
 
 class RPN {
 private:
-	std::stack<double> _operands;
+	std::stack<double, std::list<double> > _operands;
 	
 	bool isOperator(const std::string& token) const;
 	bool isNumber(const std::string& token) const;

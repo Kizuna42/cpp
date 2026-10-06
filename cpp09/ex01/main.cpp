@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
 		RPN calculator;
 		std::string expression = argv[1];
 		double result = calculator.evaluate(expression);
-		std::cout << std::setprecision(std::numeric_limits<double>::digits10)
+		std::cout << std::setprecision(std::numeric_limits<double>::digits10 + 2)
 			<< result << std::endl;
 	} catch (const std::exception&) {
 		std::cerr << "Error" << std::endl;

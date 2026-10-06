@@ -8,7 +8,7 @@
 int main() {
 	RPN calculator;
 	std::string expression;
-	std::cout << std::setprecision(std::numeric_limits<double>::digits10);
+	std::cout << std::setprecision(std::numeric_limits<double>::digits10 + 2);
 	while (std::getline(std::cin, expression)) {
 		try {
 			double result = calculator.evaluate(expression);

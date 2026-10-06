@@ -8,6 +8,27 @@
 #include <sstream>
 #include <sys/time.h>
 
+PmergeMe::SortStats::SortStats()
+	: comparisons(0), pairSwaps(0), pendInsertions(0) {
+}
+
+PmergeMe::SortStats::SortStats(const SortStats& other)
+	: comparisons(other.comparisons), pairSwaps(other.pairSwaps),
+	  pendInsertions(other.pendInsertions) {
+}
+
+PmergeMe::SortStats& PmergeMe::SortStats::operator=(const SortStats& other) {
+	if (this != &other) {
+		comparisons = other.comparisons;
+		pairSwaps = other.pairSwaps;
+		pendInsertions = other.pendInsertions;
+	}
+	return *this;
+}
+
+PmergeMe::SortStats::~SortStats() {
+}
+
 PmergeMe::PmergeMe(void)
 	: _vectorTimeUs(0.0), _dequeTimeUs(0.0) {
 }
@@ -15,7 +36,8 @@ PmergeMe::PmergeMe(void)
 PmergeMe::PmergeMe(const PmergeMe& other)
 	: _tokens(other._tokens), _vectorData(other._vectorData),
 	  _dequeData(other._dequeData), _vectorTimeUs(other._vectorTimeUs),
-	  _dequeTimeUs(other._dequeTimeUs) {
+	  _dequeTimeUs(other._dequeTimeUs), _vectorStats(other._vectorStats),
+	  _dequeStats(other._dequeStats) {
 }
 
 PmergeMe& PmergeMe::operator=(const PmergeMe& other) {
@@ -25,6 +47,8 @@ PmergeMe& PmergeMe::operator=(const PmergeMe& other) {
 		_dequeData = other._dequeData;
 		_vectorTimeUs = other._vectorTimeUs;
 		_dequeTimeUs = other._dequeTimeUs;
+		_vectorStats = other._vectorStats;
+		_dequeStats = other._dequeStats;
 	}
 	return *this;
 }
@@ -64,11 +88,13 @@ int PmergeMe::stringToInt(const std::string& str) const {
 }
 
 size_t PmergeMe::upperBoundVector(const std::vector<int>& values,
-	const std::vector<size_t>& chain, size_t end, int value) const {
+	const std::vector<size_t>& chain, size_t end, int value,
+	SortStats& stats) const {
 	size_t lo = 0;
 	size_t hi = end;
 	while (lo < hi) {
 		size_t mid = lo + (hi - lo) / 2;
+		++stats.comparisons;
 		if (values[chain[mid]] <= value)
 			lo = mid + 1;
 		else
@@ -98,7 +124,7 @@ std::vector<size_t> PmergeMe::jacobsthalOrderVector(
 }
 
 void PmergeMe::fordJohnsonVector(const std::vector<int>& values,
-	std::vector<size_t>& order) {
+	std::vector<size_t>& order, SortStats& stats) {
 	size_t n = order.size();
 	if (n < 2)
 		return;
@@ -111,7 +137,9 @@ void PmergeMe::fordJohnsonVector(const std::vector<int>& values,
 	for (size_t i = 0; i + 1 < n; i += 2) {
 		size_t a = order[i];
 		size_t b = order[i + 1];
+		++stats.comparisons;
 		if (values[a] < values[b]) {
+			++stats.pairSwaps;
 			size_t tmp = a;
 			a = b;
 			b = tmp;
@@ -120,7 +148,7 @@ void PmergeMe::fordJohnsonVector(const std::vector<int>& values,
 		partnerOf[a] = b;
 	}
 
-	fordJohnsonVector(values, winners);
+	fordJohnsonVector(values, winners, stats);
 
 	std::vector<size_t> chain;
 	chain.reserve(n);
@@ -147,8 +175,9 @@ void PmergeMe::fordJohnsonVector(const std::vector<int>& values,
 			loser = partnerOf[winners[winnerIndex]];
 			limit = winnerPos[winnerIndex];
 		}
-		size_t pos = upperBoundVector(values, chain, limit, values[loser]);
+		size_t pos = upperBoundVector(values, chain, limit, values[loser], stats);
 		chain.insert(chain.begin() + pos, loser);
+		++stats.pendInsertions;
 		for (size_t i = 0; i < winnerPos.size(); i++) {
 			if (winnerPos[i] >= pos)
 				winnerPos[i]++;
@@ -159,11 +188,13 @@ void PmergeMe::fordJohnsonVector(const std::vector<int>& values,
 }
 
 size_t PmergeMe::upperBoundDeque(const std::deque<int>& values,
-	const std::deque<size_t>& chain, size_t end, int value) const {
+	const std::deque<size_t>& chain, size_t end, int value,
+	SortStats& stats) const {
 	size_t lo = 0;
 	size_t hi = end;
 	while (lo < hi) {
 		size_t mid = lo + (hi - lo) / 2;
+		++stats.comparisons;
 		if (values[chain[mid]] <= value)
 			lo = mid + 1;
 		else
@@ -192,7 +223,7 @@ std::deque<size_t> PmergeMe::jacobsthalOrderDeque(size_t pendCount) const {
 }
 
 void PmergeMe::fordJohnsonDeque(const std::deque<int>& values,
-	std::deque<size_t>& order) {
+	std::deque<size_t>& order, SortStats& stats) {
 	size_t n = order.size();
 	if (n < 2)
 		return;
@@ -204,7 +235,9 @@ void PmergeMe::fordJohnsonDeque(const std::deque<int>& values,
 	for (size_t i = 0; i + 1 < n; i += 2) {
 		size_t a = order[i];
 		size_t b = order[i + 1];
+		++stats.comparisons;
 		if (values[a] < values[b]) {
+			++stats.pairSwaps;
 			size_t tmp = a;
 			a = b;
 			b = tmp;
@@ -213,7 +246,7 @@ void PmergeMe::fordJohnsonDeque(const std::deque<int>& values,
 		partnerOf[a] = b;
 	}
 
-	fordJohnsonDeque(values, winners);
+	fordJohnsonDeque(values, winners, stats);
 
 	std::deque<size_t> chain;
 	chain.push_back(partnerOf[winners[0]]);
@@ -239,8 +272,9 @@ void PmergeMe::fordJohnsonDeque(const std::deque<int>& values,
 			loser = partnerOf[winners[winnerIndex]];
 			limit = winnerPos[winnerIndex];
 		}
-		size_t pos = upperBoundDeque(values, chain, limit, values[loser]);
+		size_t pos = upperBoundDeque(values, chain, limit, values[loser], stats);
 		chain.insert(chain.begin() + pos, loser);
+		++stats.pendInsertions;
 		for (size_t i = 0; i < winnerPos.size(); i++) {
 			if (winnerPos[i] >= pos)
 				winnerPos[i]++;
@@ -264,9 +298,12 @@ void PmergeMe::parseInput(int argc, char** argv) {
 	_dequeData.clear();
 	_vectorTimeUs = 0.0;
 	_dequeTimeUs = 0.0;
+	_vectorStats = SortStats();
+	_dequeStats = SortStats();
 }
 
 void PmergeMe::sortVector(void) {
+	SortStats stats;
 	struct timeval start;
 	struct timeval end;
 	gettimeofday(&start, NULL);
@@ -277,7 +314,7 @@ void PmergeMe::sortVector(void) {
 	std::vector<size_t> order(_vectorData.size());
 	for (size_t i = 0; i < order.size(); i++)
 		order[i] = i;
-	fordJohnsonVector(_vectorData, order);
+	fordJohnsonVector(_vectorData, order, stats);
 	std::vector<int> sorted;
 	sorted.reserve(order.size());
 	for (size_t i = 0; i < order.size(); i++)
@@ -286,9 +323,11 @@ void PmergeMe::sortVector(void) {
 	gettimeofday(&end, NULL);
 	_vectorTimeUs = (end.tv_sec - start.tv_sec) * 1000000.0
 		+ (end.tv_usec - start.tv_usec);
+	_vectorStats = stats;
 }
 
 void PmergeMe::sortDeque(void) {
+	SortStats stats;
 	struct timeval start;
 	struct timeval end;
 	gettimeofday(&start, NULL);
@@ -298,7 +337,7 @@ void PmergeMe::sortDeque(void) {
 	std::deque<size_t> order(_dequeData.size());
 	for (size_t i = 0; i < order.size(); i++)
 		order[i] = i;
-	fordJohnsonDeque(_dequeData, order);
+	fordJohnsonDeque(_dequeData, order, stats);
 	std::deque<int> sorted;
 	for (size_t i = 0; i < order.size(); i++)
 		sorted.push_back(_dequeData[order[i]]);
@@ -306,6 +345,7 @@ void PmergeMe::sortDeque(void) {
 	gettimeofday(&end, NULL);
 	_dequeTimeUs = (end.tv_sec - start.tv_sec) * 1000000.0
 		+ (end.tv_usec - start.tv_usec);
+	_dequeStats = stats;
 }
 
 void PmergeMe::displayBefore(void) const {
@@ -338,9 +378,15 @@ void PmergeMe::displayTiming(void) const {
 	std::cout << std::fixed << std::setprecision(5);
 	std::cout << "Time to process a range of " << _vectorData.size()
 		<< " elements with std::vector : " << _vectorTimeUs << " us"
+		<< " | comparisons: " << _vectorStats.comparisons
+		<< " | pair_swaps: " << _vectorStats.pairSwaps
+		<< " | insertions: " << _vectorStats.pendInsertions
 		<< std::endl;
 	std::cout << "Time to process a range of " << _dequeData.size()
 		<< " elements with std::deque  : " << _dequeTimeUs << " us"
+		<< " | comparisons: " << _dequeStats.comparisons
+		<< " | pair_swaps: " << _dequeStats.pairSwaps
+		<< " | insertions: " << _dequeStats.pendInsertions
 		<< std::endl;
 }
 
