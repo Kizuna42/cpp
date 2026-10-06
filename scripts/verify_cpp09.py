@@ -170,7 +170,8 @@ def bitcoin(work):
     file.write_text("")
     for args in [[], [file], [work / "missing"], [work], [file, file]]:
         result = run([executable, *args], cwd=work)
-        require(result.returncode != 0 and result.stderr.startswith("Error:"), "File error missed")
+        require(result.returncode != 0 and result.stdout.startswith("Error:") and not result.stderr,
+                "File error must use stdout")
     fixture = work / "db-fixture"
     fixture.mkdir()
     file.write_text("date | value\n2011-01-02 | 2\n")
@@ -185,7 +186,8 @@ def bitcoin(work):
     for content in corrupt:
         (fixture / "data.csv").write_text(content)
         result = run([executable, file], cwd=fixture)
-        require(result.returncode != 0 and result.stderr.startswith("Error:"), "Corrupt DB accepted")
+        require(result.returncode != 0 and result.stdout.startswith("Error:") and not result.stderr,
+                "Corrupt DB error must use stdout")
     (fixture / "data.csv").write_text("2011-01-01,1e308\n")
     file.write_text("date | value\n2011-01-02 | 1000\n")
     result = success([executable, file], cwd=fixture)
@@ -256,6 +258,18 @@ def rpn(work):
         require(actual == "Error" if expected is None else actual != "Error" and close(actual, expected),
                 f"RPN mismatch: {expr!r}: expected {expected}, got {actual}")
     executable = work / "ex01/RPN"
+    exact_cases = [("9 " + "9 * " * exponent, decimal.Decimal(9 ** (exponent + 1)))
+                   for exponent in range(10, 16)]
+    exact_cases += [("8 3 / 2 * 6 * 6 * 6 * 6 *", decimal.Decimal(6912)),
+                    ("5 2 / 2 *", decimal.Decimal(5)),
+                    ("0 3 - 2 /", decimal.Decimal("-1.5"))]
+    for expr, expected in exact_cases:
+        result = success([executable, expr])
+        require(not result.stderr and decimal.Decimal(result.stdout.strip()) == expected,
+                f"RPN CLI lost exact value: {expr!r}: {result.stdout!r}")
+    result = success([work / "rpn_batch"], stdin="\n".join(expr for expr, _ in exact_cases) + "\n")
+    require([decimal.Decimal(line) for line in result.stdout.splitlines()] ==
+            [expected for _, expected in exact_cases], "RPN batch lost exact values")
     for expr, expected in cases[:40] + cases[-34:]:
         result = run([executable, expr])
         if expected is None:
@@ -279,6 +293,10 @@ def pmerge(work, flags, quick):
     rng = random.Random(420902)
     cases = [["42"], ["+3", "001", "2"], ["0" * 10000 + "1"], ["2147483647"] * 3000,
              list(range(3000, 0, -1)), [rng.randrange(1, 100000) for _ in range(3001)]]
+    exact_counts = {(42,): (0, 0, 0), (2, 1): (1, 0, 0), (1, 2): (1, 1, 0),
+                    (1, 1): (1, 0, 0), (3, 2, 1): (3, 0, 1),
+                    (1, 2, 3): (2, 1, 1), (3, 5, 9, 7, 4): (7, 2, 2)}
+    cases.extend(exact_counts)
     cases.extend([rng.randrange(1, 20) for _ in range(n)] for n in range(1, 50))
     for values in cases:
         result = success([executable, *values])
@@ -289,9 +307,17 @@ def pmerge(work, flags, quick):
                 [int(str(x).lstrip("+0") or "0") for x in values], "Before input changed")
         require(output[1].startswith("After: ") and [int(x) for x in output[1].split()[1:]] ==
                 sorted(int(str(x).lstrip("+0") or "0") for x in values), "CLI sort differs from Python sorted")
+        counts = []
         for line, container in zip(output[2:], ["vector", "deque"]):
-            pattern = rf"Time to process a range of {len(values)} elements with std::{container}\s+: (\d+\.\d+) us"
-            require(re.fullmatch(pattern, line) is not None, f"Timing malformed: {line}")
+            pattern = (rf"Time to process a range of {len(values)} elements with std::{container}\s+: \d+\.\d+ us"
+                       r" \| comparisons: (\d+) \| pair_swaps: (\d+) \| insertions: (\d+)")
+            match = re.fullmatch(pattern, line)
+            require(match is not None, f"Timing/counters malformed: {line}")
+            counts.append(tuple(map(int, match.groups())))
+        require(counts[0] == counts[1], "Container counters differ")
+        key = tuple(int(str(value).lstrip("+0") or "0") for value in values)
+        if key in exact_counts:
+            require(counts[0] == exact_counts[key], f"Wrong operation counts: {key}: {counts[0]}")
     instrumented = work / "instrumented"
     instrumented.mkdir()
     header = (work / "ex02/PmergeMe.hpp").read_text()

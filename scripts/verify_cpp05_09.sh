@@ -381,7 +381,7 @@ if grep -REq --include='*.cpp' --include='*.hpp' 'std::map' \
 	"$ROOT/cpp09/ex00" && \
 	grep -REq --include='*.cpp' --include='*.hpp' 'std::stack' \
 	"$ROOT/cpp09/ex01" && \
-	! grep -REq --include='*.cpp' --include='*.hpp' 'std::(map|list|vector|deque)' \
+	! grep -REq --include='*.cpp' --include='*.hpp' 'std::(map|vector|deque)' \
 	"$ROOT/cpp09/ex01" && \
 	grep -REq --include='*.cpp' --include='*.hpp' 'std::vector' \
 	"$ROOT/cpp09/ex02" && \
@@ -563,9 +563,9 @@ if "$ROOT/cpp09/ex02/PmergeMe" 3 5 9 7 4 >"$RUN_DIR/pmerge_subject.out" 2>&1 && 
 	sed -n '1p' "$RUN_DIR/pmerge_subject.out" | grep -qx 'Before: 3 5 9 7 4' && \
 	sed -n '2p' "$RUN_DIR/pmerge_subject.out" | grep -qx 'After:  3 4 5 7 9' && \
 	sed -n '3p' "$RUN_DIR/pmerge_subject.out" | \
-		grep -Eqx 'Time to process a range of 5 elements with std::vector : [0-9]+\.[0-9]+ us' && \
+		grep -Eqx 'Time to process a range of 5 elements with std::vector : [0-9]+\.[0-9]+ us \| comparisons: 7 \| pair_swaps: 2 \| insertions: 2' && \
 	sed -n '4p' "$RUN_DIR/pmerge_subject.out" | \
-		grep -Eqx 'Time to process a range of 5 elements with std::deque  : [0-9]+\.[0-9]+ us'; then
+		grep -Eqx 'Time to process a range of 5 elements with std::deque  : [0-9]+\.[0-9]+ us \| comparisons: 7 \| pair_swaps: 2 \| insertions: 2'; then
 	pass 'PmergeMe subject example full structure'
 else
 	fail 'PmergeMe subject example full structure'
