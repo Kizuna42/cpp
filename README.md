@@ -64,6 +64,8 @@ c++ -Wall -Wextra -Werror -std=c++98
 
 - 全 38 Exercise を `g++` と `clang++` でビルド（各 Makefile の必須フラグを使用）
 - `python3 scripts/verify_cpp09.py --quick` と、ASan/UBSan 付きの `--sanitize --quick`
+- `scripts/verify_cpp00_04.sh`（`g++`/`clang++`）：CPP00〜04 のビルド、subject 例との出力比較、全 22 実行ファイルの Valgrind
+- `scripts/verify_cpp05_09.sh`：CPP05〜09 の一括検証（下記、Valgrind 込み）
 
 ## CPP05-09の一括検証
 
