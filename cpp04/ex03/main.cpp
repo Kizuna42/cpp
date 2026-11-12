@@ -115,7 +115,7 @@ int main(void) {
 	MateriaSource* sourceCopy = new MateriaSource(*source);
 	sourceCopy->printTemplates();
 
-	sourceCopy->createMateria("ice");
+	delete sourceCopy->createMateria("ice");
 
 	std::cout << "\n=== Self-Assignment Test ===" << std::endl;
 	std::cout << "Testing self-assignment safety (character = character)" << std::endl;

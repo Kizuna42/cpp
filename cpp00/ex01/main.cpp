@@ -3,19 +3,31 @@
 #include <iostream>
 #include <string>
 
-std::string getInput(const std::string& prompt) {
-	std::string input;
-	std::cout << prompt;
-	std::getline(std::cin, input);
-	return input;
-}
-
 bool isValidInput(const std::string& input) {
 	return !input.empty();
 }
 
+bool getInput(const std::string& prompt, std::string& input) {
+	std::cout << prompt;
+	if (!std::getline(std::cin, input)) {
+		std::cout << std::endl;
+		return false;
+	}
+	return true;
+}
+
+bool getField(const std::string& prompt, std::string& input) {
+	do {
+		if (!getInput(prompt, input))
+			return false;
+	} while (!isValidInput(input));
+	return true;
+}
+
 int stringToInt(const std::string& str) {
 	int result = 0;
+	if (str.empty() || str.length() > 9)
+		return -1;
 	for (size_t i = 0; i < str.length(); i++) {
 		if (str[i] < '0' || str[i] > '9')
 			return -1;
@@ -24,36 +36,25 @@ int stringToInt(const std::string& str) {
 	return result;
 }
 
-Contact createContact() {
-	Contact contact;
+bool createContact(Contact& contact) {
 	std::string input;
-	
-	do {
-		input = getInput("Enter first name: ");
-	} while (!isValidInput(input));
+
+	if (!getField("Enter first name: ", input))
+		return false;
 	contact.setFirstName(input);
-	
-	do {
-		input = getInput("Enter last name: ");
-	} while (!isValidInput(input));
+	if (!getField("Enter last name: ", input))
+		return false;
 	contact.setLastName(input);
-	
-	do {
-		input = getInput("Enter nickname: ");
-	} while (!isValidInput(input));
+	if (!getField("Enter nickname: ", input))
+		return false;
 	contact.setNickname(input);
-	
-	do {
-		input = getInput("Enter phone number: ");
-	} while (!isValidInput(input));
+	if (!getField("Enter phone number: ", input))
+		return false;
 	contact.setPhoneNumber(input);
-	
-	do {
-		input = getInput("Enter darkest secret: ");
-	} while (!isValidInput(input));
+	if (!getField("Enter darkest secret: ", input))
+		return false;
 	contact.setDarkestSecret(input);
-	
-	return contact;
+	return true;
 }
 
 int main() {
@@ -64,11 +65,13 @@ int main() {
 	std::cout << "Available commands: ADD, SEARCH, EXIT" << std::endl;
 	
 	while (true) {
-		std::cout << "Enter command: ";
-		std::getline(std::cin, command);
+		if (!getInput("Enter command: ", command))
+			break;
 		
 		if (command == "ADD") {
-			Contact newContact = createContact();
+			Contact newContact;
+			if (!createContact(newContact))
+				break;
 			phoneBook.addContact(newContact);
 			std::cout << "Contact added successfully!" << std::endl;
 		}
@@ -81,8 +84,8 @@ int main() {
 			phoneBook.displayContacts();
 			
 			std::string indexStr;
-			std::cout << "Enter index of contact to display: ";
-			std::getline(std::cin, indexStr);
+			if (!getInput("Enter index of contact to display: ", indexStr))
+				break;
 			
 			int index = stringToInt(indexStr);
 			if (index == -1) {
