@@ -15,10 +15,8 @@ int main(int argc, char **argv)
 		std::string arg = argv[i];
 		for (size_t j = 0; j < arg.length(); j++)
 		{
-			std::cout << (char)std::toupper(arg[j]);
+			std::cout << static_cast<char>(std::toupper(static_cast<unsigned char>(arg[j])));
 		}
-		if (argc - 1 > i)
-			std::cout << " ";
 	}
 	std::cout << std::endl;
 	return (0);
